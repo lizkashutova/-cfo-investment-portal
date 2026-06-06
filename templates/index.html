@@ -1,0 +1,2084 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИНВЕСТ-МАТРИЦА | СППР Инвестиционной привлекательности ЦФО РФ</title>
+    
+    <!-- Подключение шрифтов Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Подключение Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        montserrat: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            blue: '#0066cc', // Синий неон
+                            darkBg: '#11141D', // Глубокий темно-синий
+                            cardBg: '#1A1F2C', // Карточки
+                            border: 'rgba(0, 102, 204, 0.25)',
+                            neonGlow: 'rgba(0, 102, 204, 0.4)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Подключение Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    
+    <!-- Подключение KaTeX для математических формул -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+
+    <style>
+        .custom-shadow {
+            box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.25);
+        }
+        .neon-border {
+            border: 1px solid rgba(0, 102, 204, 0.3);
+            box-shadow: 0 0 15px rgba(0, 102, 204, 0.15);
+        }
+        .neon-border-hover:hover {
+            border-color: rgba(0, 102, 204, 0.6);
+            box-shadow: 0 0 25px rgba(0, 102, 204, 0.35);
+            transform: translateY(-2px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* Стилизация слайдеров под темный UI */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: #2E3748;
+            border-radius: 2px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #0066cc;
+            cursor: pointer;
+            border: 2px solid #FFFFFF;
+            box-shadow: 0 0 8px rgba(0, 102, 204, 0.8);
+            transition: transform 0.1s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+            background: #3399ff;
+        }
+        /* Анимации вкладок */
+        .tab-panel {
+            display: none;
+        }
+        .tab-panel.active {
+            display: block;
+            animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Кастомный скроллбар */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #11141D;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0066cc;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3399ff;
+        }
+        body {
+            transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        header {
+            transition: background-color 0.5s ease, border-color 0.5s ease;
+        }
+        /* 3D-like Spinning Animation for Nokia 3310 */
+        @keyframes spin3D {
+            0% {
+                transform: rotateY(0deg) rotateZ(0deg);
+            }
+            50% {
+                transform: rotateY(180deg) rotateZ(5deg); /* Subtle tilt for realistic 3D perspective */
+            }
+            100% {
+                transform: rotateY(360deg) rotateZ(0deg);
+            }
+        }
+        .rotating-phone {
+            animation: spin3D 8s linear infinite;
+            transform-style: preserve-3d;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)) drop-shadow(0 0 6px rgba(126,120,210,0.25));
+            transition: animation-duration 0.3s ease, filter 0.3s ease;
+        }
+        .perspective-container:hover .rotating-phone {
+            animation-duration: 2.5s; /* Accelerates rotation on hover */
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)) drop-shadow(0 0 15px rgba(139,92,246,0.7)); /* Intense neon purple glow */
+        }
+        /* Volumetric 3D Profile Card Effects */
+        @keyframes floatAndSpin {
+            0% {
+                transform: translateY(0px) rotate(0deg) scale(1);
+            }
+            50% {
+                transform: translateY(-6px) rotate(180deg) scale(1.1); /* Floating lift & spin */
+            }
+            100% {
+                transform: translateY(0px) rotate(360deg) scale(1);
+            }
+        }
+        .floating-crystal {
+            animation: floatAndSpin 8s ease-in-out infinite;
+            filter: drop-shadow(0 0 8px rgba(0,102,204,0.4));
+        }
+        /* 3D Floating Prism Animation */
+        @keyframes prismRotate {
+            0% {
+                transform: rotateY(0deg) translateY(-2px) rotateZ(-3deg);
+            }
+            100% {
+                transform: rotateY(180deg) translateY(2px) rotateZ(3deg);
+            }
+        }
+        .floating-prism {
+            animation: prismFloat 3s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 10px rgba(0, 102, 204, 0.4));
+        }
+        @keyframes prismFloat {
+            0% {
+                transform: translateY(-2px) scale(0.98);
+            }
+            100% {
+                transform: translateY(2px) scale(1.02);
+            }
+        }
+        .author-profile-card {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+        .author-profile-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: rgba(0, 102, 204, 0.8) !important;
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 25px rgba(0, 102, 204, 0.4) !important;
+        }
+        /* Large Action Button */
+        .btn-analyze-large {
+            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+            border: 2px solid #0066cc;
+            box-shadow: 0 8px 30px rgba(0, 102, 204, 0.4), 0 0 0 1px rgba(0, 102, 204, 0.2);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .btn-analyze-large::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -50%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: skewX(-25deg);
+            transition: 0.75s;
+            opacity: 0;
+        }
+        .btn-analyze-large:hover::after {
+            left: 125%;
+            opacity: 1;
+            transition: left 0.75s ease-in-out;
+        }
+        .btn-analyze-large:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(0, 102, 204, 0.6), 0 0 20px rgba(0, 102, 204, 0.4);
+            background: linear-gradient(135deg, #007bff 0%, #0052a3 100%);
+            border-color: #0088ff;
+        }
+        .btn-analyze-large:active {
+            transform: translateY(-1px) scale(0.99);
+        }
+        /* 3D Flip Cards for Formulas */
+        .flip-card-container {
+            perspective: 1000px;
+            height: 240px;
+        }
+        @media (min-width: 768px) {
+            .flip-card-container {
+                height: 210px;
+            }
+        }
+        .flip-card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: rotateX(2deg); /* Desk-like 3D tilt */
+        }
+        .flip-card-container.flipped .flip-card-inner {
+            transform: rotateY(180deg) rotateX(2deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 102, 204, 0.15);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+        .flip-card-container:hover .flip-card-inner {
+            transform: rotateX(4deg) translateY(-5px);
+        }
+        .flip-card-container.flipped:hover .flip-card-inner {
+            transform: rotateY(180deg) rotateX(4deg) translateY(-5px);
+        }
+        .flip-card-container:hover .flip-card-front,
+        .flip-card-container:hover .flip-card-back {
+            border-color: rgba(0, 102, 204, 0.4);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 102, 204, 0.15);
+        }
+        /* 3D Volumetric Video Laptop block */
+        .video-container-3d {
+            width: 75%;
+            max-width: 800px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+        .video-3d-el {
+            filter: brightness(1.02) contrast(1.02);
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+    
+        .card-grid-directions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            align-items: stretch;
+        }
+        @media (min-width: 1000px) {
+            .card-grid-directions {
+                grid-template-columns: 2fr 1.2fr 2fr !important;
+            }
+        }
+</style>
+</head>
+<body class="bg-black text-white font-sans min-h-screen flex flex-col antialiased">
+
+    <!-- ВЕРХНЯЯ ШАПКА (HEADER) -->
+    <header class="bg-black border-b border-[#0066cc]/30 py-4 px-6 md:px-12 sticky top-0 z-40 custom-shadow">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Логотип портала -->
+            <div class="flex items-center gap-5 hover:scale-[1.01] transition-all duration-300 cursor-pointer">
+                <!-- Новый брендинг: LiZ -->
+                <div class="flex items-center gap-2.5">
+                    <!-- Small Avatar Icon -->
+                    <div class="w-8 h-8 rounded-full overflow-hidden border border-[#7E78D2] flex-shrink-0 shadow-[0_0_8px_rgba(126,120,210,0.4)] bg-zinc-950 hover:scale-110 transition-all duration-300">
+                        <img src="/static/author_photo.jpeg" alt="avatar" class="w-full h-full object-cover">
+                    </div>
+                    <!-- LiZ Icon Container -->
+                    <div class="px-3 py-1 bg-[#0D1117] border border-[#7E78D2] rounded-[6px] flex items-center justify-center shadow-[0_0_12px_rgba(126,120,210,0.3)]">
+                        <span class="font-montserrat font-black italic text-xs md:text-sm tracking-tighter text-[#7E78D2]" style="text-shadow: 0 0 8px rgba(126,120,210,0.5);">
+                            L<span class="lowercase text-[0.85em] relative -top-[0.05em] -mx-[0.02em]">i</span>Z
+                        </span>
+                    </div>
+                    <!-- 3D Rotating Nokia 3310 Phone -->
+                    <div class="perspective-container flex items-center justify-center select-none animate-pulse-slow" style="perspective: 400px; width: 32px; height: 32px; margin-left: 2px;">
+                        <img src="/static/nokia_3310.png" alt="Nokia 3310" class="rotating-phone object-contain pointer-events-none" style="height: 34px; width: auto; max-width: none;">
+                    </div>
+                </div>
+                
+                <!-- Вертикальный разделитель -->
+                <div class="h-8 w-px bg-[#0066cc]/20 hidden md:block"></div>
+                
+                <!-- Групповой заголовок и паспорт разработчика -->
+                <div class="flex flex-col">
+                    <span id="header-logo" class="font-montserrat font-black text-[18px] md:text-[20px] tracking-tight leading-none text-white uppercase">
+                        ИНВЕСТ-ДИАГНОСТИКА <span class="text-[#0066cc]">ЦФО</span>
+                    </span>
+                    <span class="font-montserrat font-bold text-[9px] uppercase tracking-wider text-[#64748B] mt-2 leading-none">
+                        Интеллектуальная СППР v3.5 | Авторская разработка: Шутова Елизавета Дмитриевна | БГТУ «Военмех»
+                    </span>
+                </div>
+            </div>
+
+            <!-- СЕГМЕНТИРОВАННОЕ МЕНЮ ВКЛАДОК (TABS) -->
+            <nav class="flex space-x-4 md:space-x-8">
+                <button onclick="switchTab('tab-home', this)" class="tab-btn py-4 px-1 font-semibold text-xs md:text-sm tracking-wider uppercase transition-all border-b-2 border-[#0066cc] text-[#0066cc]">
+                    ГЛАВНАЯ СТРАНИЦА
+                </button>
+                <button onclick="switchTab('tab-roadmap', this)" class="tab-btn py-4 px-1 font-semibold text-xs md:text-sm tracking-wider uppercase transition-all border-b-2 border-transparent text-gray-500 hover:text-[#0066cc]">
+                    ЭТАПЫ ИССЛЕДОВАНИЯ
+                </button>
+                <button onclick="switchTab('tab-dashboard', this)" class="tab-btn py-4 px-1 font-semibold text-xs md:text-sm tracking-wider uppercase transition-all border-b-2 border-transparent text-gray-500 hover:text-[#0066cc]">
+                    АНАЛИТИЧЕСКАЯ ПАНЕЛЬ
+                </button>
+                <button onclick="switchTab('tab-methodology', this)" class="tab-btn py-4 px-1 font-semibold text-xs md:text-sm tracking-wider uppercase transition-all border-b-2 border-transparent text-gray-500 hover:text-[#0066cc]">
+                    МЕТОДОЛОГИЯ И МАТЕМАТИЧЕСКИЙ АППАРАТ
+                </button>
+            </nav>
+            
+        </div>
+    </header>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ (MAIN) -->
+    <main class="flex-grow max-w-7xl mx-auto w-full p-6 md:p-8">
+        
+        <!-- Вкладка 1: Главная страница (Брутализм, Черный фон) -->
+        <section id="tab-home" class="tab-panel active space-y-12">
+            
+            <!-- Центральный медиа-блок с видео-ноутбуком -->
+            <div class="video-container-3d relative">
+                <video autoplay loop muted playsinline class="video-3d-el" style="width: 100%; display: block;">
+                    <source src="/static/dashboard_preview.mp4" type="video/mp4">
+                    Ваш браузер не поддерживает тег видео.
+                </video>
+            </div>
+
+            <!-- Нижний текстовый блок (Массивный Геометрический Заголовок) -->
+            <div class="w-full space-y-6 pt-4">
+                <h2 class="font-montserrat font-black text-5xl md:text-7xl lg:text-[7.5rem] tracking-tighter text-[#0066cc] uppercase leading-none select-none">
+                    ИНВЕСТ-МАТРИЦА
+                </h2>
+                
+                <hr class="border-[#0066cc]/30 w-full">
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-2">
+                    <div class="lg:col-span-2 flex flex-col justify-between gap-6">
+                        <p class="text-white text-base md:text-xl font-light leading-relaxed">
+                            Интерактивный калькулятор сравнительной оценки инвестиционной привлекательности регионов Центрального федерального округа для ИТ-сектора. Программа производит математическую свертку многокритериальных векторов социально-экономического развития регионов в реальном времени.
+                        </p>
+                        <!-- Крупная выделяющаяся кнопка действия -->
+                        <div class="pt-2 text-left">
+                            <button onclick="switchTab('tab-dashboard', document.querySelector('.tab-btn[onclick*=\'tab-dashboard\']')); window.scrollTo({ top: 0, behavior: 'smooth' });"
+                                    class="btn-analyze-large flex items-center justify-center gap-4 px-8 py-5 rounded-xl text-white font-montserrat font-black text-lg md:text-xl tracking-wide uppercase select-none transition-all duration-300 w-full sm:w-auto sm:inline-flex">
+                                <!-- Enter Key SVG Metaphor -->
+                                <svg class="flex-shrink-0 shadow-md" width="46" height="30" viewBox="0 0 46 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="1" y="3" width="44" height="25" rx="5" fill="#94A3B8" />
+                                    <rect x="1" y="1" width="44" height="24" rx="5" fill="#E2E8F0" />
+                                    <rect x="3" y="2" width="40" height="20" rx="4" fill="#F8FAFC" />
+                                    <rect x="4.5" y="3" width="37" height="18" rx="3.5" fill="#E2E8F0" />
+                                    <text x="23" y="15.5" fill="#334155" font-family="'Montserrat', sans-serif" font-size="9" font-weight="900" text-anchor="middle" letter-spacing="-0.2">Enter</text>
+                                </svg>
+                                <span>ПРОВЕСТИ ИНВЕСТ-АНАЛИЗ</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Объемная 3D-карточка разработчика ("Author Profile Card") -->
+                    <div class="lg:col-span-1 relative overflow-hidden rounded-2xl p-6 flex items-center gap-5 transition-all duration-500 cursor-pointer select-none author-profile-card"
+                         style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(0, 102, 204, 0.35); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), 0 0 15px rgba(0, 102, 204, 0.15);">
+                        
+                        <!-- Вращающийся 3D-кристалл (SVG-кристалл) -->
+                        <div class="absolute -top-3 -right-3 w-12 h-12 floating-crystal select-none pointer-events-none z-10">
+                            <svg viewBox="0 0 100 100" class="w-full h-full">
+                                <defs>
+                                    <linearGradient id="crystal-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#0066cc" stop-opacity="0.8"/>
+                                        <stop offset="50%" stop-color="#7E78D2" stop-opacity="0.9"/>
+                                        <stop offset="100%" stop-color="#14B8A6" stop-opacity="0.8"/>
+                                    </linearGradient>
+                                </defs>
+                                <!-- Стилизованный многогранный кристалл -->
+                                <polygon points="50,15 80,40 50,85 20,40" fill="url(#crystal-grad)" />
+                                <polygon points="50,15 50,85 80,40" fill="rgba(255,255,255,0.15)" />
+                                <line x1="50" y1="15" x2="50" y2="85" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                                <line x1="20" y1="40" x2="80" y2="40" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
+                            </svg>
+                        </div>
+
+                        <!-- Слева: Фото автора -->
+                        <div class="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-[#0066cc]/60 flex-shrink-0 shadow-[0_0_15px_rgba(0,102,204,0.4)] relative z-10 bg-zinc-950">
+                            <img src="/static/author_photo.jpeg" alt="Шутова Е.Д." class="w-full h-full object-cover">
+                        </div>
+
+                        <!-- Справа: Информация -->
+                        <div class="flex flex-col flex-grow relative z-10 min-w-0">
+                            <div class="text-[9px] text-zinc-400 font-extrabold uppercase tracking-widest leading-none">Разработчик СППР</div>
+                            
+                            <!-- ФИО с 3D-тенями -->
+                            <h4 class="font-montserrat font-black text-xl md:text-[24px] text-white tracking-tight leading-tight mt-1.5 break-words"
+                                style="text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(0,102,204,0.3);">
+                                Шутова Елизавета
+                            </h4>
+                            <h4 class="font-montserrat font-black text-xl md:text-[24px] text-[#0066cc] tracking-tight leading-tight break-words"
+                                style="text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(0,102,204,0.2);">
+                                Дмитриевна
+                            </h4>
+                            
+                            <div class="flex items-center gap-2 mt-2">
+                                <span class="bg-[#0066cc]/20 text-[#0066cc] text-[9px] font-extrabold uppercase px-2 py-0.5 rounded border border-[#0066cc]/30 shadow-[0_0_8px_rgba(0,102,204,0.2)]">
+                                    ВКР 2026
+                                </span>
+                            </div>
+                            
+                            <div class="border-t border-zinc-700/40 pt-2 mt-2.5">
+                                <div class="text-[8px] text-zinc-500 font-bold uppercase tracking-wider">Научная база</div>
+                                <p class="text-[10px] text-zinc-300 font-semibold leading-tight mt-0.5" style="text-shadow: 0 1px 2px rgba(0,0,0,0.6);">
+                                    БГТУ «Военмех» им. Д.Ф. Устинова
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+            </div>
+        </div>
+
+             <!-- ================= СЕКЦИЯ СТРУКТУРНЫХ КАРТОЧЕК (НАУЧНЫЙ ОТЧЕТ ВКР) ================= -->
+             
+             <!-- Сетка: Направления анализа / Целевая аудитория -->
+             <div class="card-grid-directions pt-6">
+                  
+                  <!-- Карточка 1: Направления многокритериального анализа -->
+                  <div class="bg-[#11141D] border border-[#0066cc]/40 rounded-2xl p-[24px] shadow-[0_0_20px_rgba(0,102,204,0.1)] hover:scale-[1.01] transition-all duration-300 flex flex-col gap-4">
+                      <div class="flex items-center gap-3 justify-start border-b border-[#0066cc]/20 pb-3">
+                          <!-- SVG Grid Icon -->
+                          <svg class="w-6 h-6 text-[#0066cc] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h7v7H3V3zm11 0h7v7h-7V3zm0 11h7v7h-7v-7zM3 11h7v7H3v-7z" />
+                          </svg>
+                          <h3 class="font-montserrat font-black text-[20px] tracking-tight text-white uppercase text-left">
+                              НАПРАВЛЕНИЯ МНОГОКРИТЕРИАЛЬНОГО АНАЛИЗА
+                          </h3>
+                      </div>
+                      <p class="text-[14px] text-zinc-300 font-medium leading-relaxed text-left">
+                          В рамках практической части ВКР разработана программная СППР. Комплекс автоматизирует сбор данных регионального рынка труда, осуществляет многокритериальную Min-Max нормализацию дескрипторов и линейно-аддитивную свертку для оценки ИТ-потенциала 18 регионов ЦФО.
+                      </p>
+                  </div>
+
+                  <!-- Тематическая иллюстрация: Матрица анализа данных (в середине) -->
+                  <div class="relative overflow-hidden rounded-2xl border border-[#0066cc]/30 shadow-[0_0_20px_rgba(0,102,204,0.15)] flex flex-col items-center justify-center min-h-[220px] bg-[#11141D]/50 hover:scale-[1.01] transition-all duration-300 p-4">
+                      <img src="/static/invest_matrix_theme.png" alt="Сетевой анализ ИТ-инвестиций" class="w-full h-full object-contain max-h-[180px]">
+                      <!-- Текстовая плашка поверх картинки (Cyberpunk HUD style) -->
+                      <div class="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg">
+                          <span class="text-[9px] font-montserrat font-black uppercase tracking-widest text-[#14B8A6]">СППР ИНВЕСТ-АНАЛИЗ</span>
+                          <span class="text-[8px] font-sans font-bold text-zinc-400">DATA MATRIX v3.5</span>
+                      </div>
+                  </div>
+
+                  <!-- Карточка 2: Целевая аудитория испытаний -->
+                  <div class="bg-[#11141D] border border-[#0066cc]/40 rounded-2xl p-[24px] shadow-[0_0_20px_rgba(0,102,204,0.1)] hover:scale-[1.01] transition-all duration-300 flex flex-col gap-4">
+                      <div class="flex items-center gap-3 justify-start border-b border-[#0066cc]/20 pb-3">
+                          <!-- SVG Users Icon -->
+                          <svg class="w-6 h-6 text-[#0066cc] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2m16-10a4 4 0 1 0-8 0 4 4 0 0 0 8 0zm-2 10v-2a4 4 0 0 0-3-3.87m-4-12a4 4 0 1 0-8 0 4 4 0 0 0 8 0z" />
+                          </svg>
+                          <h3 class="font-montserrat font-black text-[20px] tracking-tight text-white uppercase text-left">
+                              ЦЕЛЕВАЯ АУДИТОРИЯ ИСПЫТАНИЙ
+                          </h3>
+                      </div>
+                      <p class="text-[14px] text-zinc-300 font-medium leading-relaxed text-left">
+                          Разработанный инструментарий ориентирован на применение профильными министерствами для мониторинга цифровой зрелости территорий, а также стратегическими инвесторами для обоснования локализации R&D-центров и оптимизации ФОТ.
+                      </p>
+                  </div>
+             </div>
+
+             <!-- Блок: Сравнительный анализ эффективности -->
+             <div class="space-y-8 pt-6">
+                 <h3 class="font-montserrat font-black text-[24px] tracking-tight text-white uppercase text-left relative inline-block">
+                     СРАВНИТЕЛЬНЫЙ АНАЛИЗ ЭФФЕКТИВНОСТИ
+                     <span class="absolute bottom-[-6px] left-0 w-16 h-1 bg-gradient-to-r from-red-500 to-[#7E78D2] rounded-full"></span>
+                 </h3>
+                 
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                     <!-- Традиционный ручной подход (Устаревший) -->
+                     <div class="relative overflow-hidden rounded-2xl p-[28px] flex flex-col gap-5 border border-dashed border-red-500/30 bg-zinc-950/40 hover:border-red-500/50 hover:scale-[1.01] transition-all duration-300">
+                         <!-- Фоновый декоративный знак "Х" -->
+                         <div class="absolute -right-8 -bottom-8 text-[120px] font-black text-red-500/[0.03] select-none pointer-events-none font-sans">✕</div>
+                         
+                         <div class="flex items-center gap-3 justify-start border-b border-zinc-800/80 pb-4">
+                             <!-- SVG Clock Icon with Red tint -->
+                             <svg class="w-6 h-6 text-red-500/60 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                             </svg>
+                             <h4 class="font-montserrat font-black text-lg text-red-500/80 uppercase tracking-wider">
+                                 Традиционный ручной подход
+                             </h4>
+                         </div>
+                         <ul class="space-y-4 text-[14px] text-zinc-400 font-medium text-left">
+                             <li class="flex items-start gap-3">
+                                 <!-- SVG Cross -->
+                                 <svg class="w-5 h-5 text-red-500/70 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                 </svg>
+                                 <span><strong class="text-zinc-300">Затраты времени:</strong> 3-4 недели сбора и ручного сведения отчетов Росстата.</span>
+                             </li>
+                             <li class="flex items-start gap-3">
+                                 <!-- SVG Cross -->
+                                 <svg class="w-5 h-5 text-red-500/70 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                 </svg>
+                                 <span><strong class="text-zinc-300">Риски:</strong> высокая погрешность, отсутствие гибкого сценарного моделирования.</span>
+                             </li>
+                         </ul>
+                     </div>
+
+                     <!-- Авторский комплекс "Инвест-Диагностика" (Инновационный) -->
+                     <div class="relative overflow-hidden rounded-2xl p-[28px] flex flex-col gap-5 border border-solid border-[#7E78D2]/40 hover:scale-[1.02] transition-all duration-300 shadow-[0_15px_30px_rgba(126,120,210,0.15),_0_0_20px_rgba(0,102,204,0.05),_inset_0_0_15px_rgba(126,120,210,0.05)]"
+                          style="background: linear-gradient(135deg, rgba(13, 17, 29, 0.95) 0%, rgba(26, 32, 53, 0.95) 100%);">
+                         
+                         <!-- Фоновый декоративный знак "✓" -->
+                         <div class="absolute -right-6 -bottom-6 text-[120px] font-black text-[#7E78D2]/[0.05] select-none pointer-events-none font-sans">✓</div>
+                         
+                         <!-- INNNOVATION Badge -->
+                         <div class="absolute top-4 right-4 z-10">
+                             <span class="bg-gradient-to-r from-[#0066cc] to-[#7E78D2] text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_12px_rgba(126,120,210,0.3)]">
+                                 ИННОВАЦИЯ
+                             </span>
+                         </div>
+
+                         <div class="flex items-center gap-3 justify-start border-b border-[#7E78D2]/20 pb-4 pr-24">
+                             <!-- SVG Lightning Icon with Teal color -->
+                             <svg class="w-6 h-6 text-[#14B8A6] flex-shrink-0 animate-pulse" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                 <path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
+                             </svg>
+                             <h4 class="font-montserrat font-black text-lg text-white uppercase tracking-wider"
+                                 style="text-shadow: 0 0 8px rgba(126, 120, 210, 0.3);">
+                                 Авторский комплекс "Инвест-Диагностика"
+                             </h4>
+                         </div>
+                         <ul class="space-y-4 text-[14px] text-white/90 font-medium text-left z-10 pr-4">
+                             <li class="flex items-start gap-3">
+                                 <!-- SVG Checkmark -->
+                                 <svg class="w-5 h-5 text-[#14B8A6] flex-shrink-0 mt-0.5 shadow-[0_0_10px_rgba(20,184,166,0.3)]" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                     <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                 </svg>
+                                 <span><strong class="text-[#14B8A6]">Затраты времени:</strong> менее 1 секунды на полный пересчет матрицы.</span>
+                             </li>
+                             <li class="flex items-start gap-3">
+                                 <!-- SVG Checkmark -->
+                                 <svg class="w-5 h-5 text-[#14B8A6] flex-shrink-0 mt-0.5 shadow-[0_0_10px_rgba(20,184,166,0.3)]" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                     <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                 </svg>
+                                 <span><strong class="text-[#14B8A6]">Преимущества:</strong> 100% точность математического ядра, динамическая адаптация весов факторов, мгновенная автоматическая генерация рекомендаций.</span>
+                             </li>
+                         </ul>
+                     </div>
+                 </div></div>
+             
+             <!-- Карточка 3 (На всю ширину): Моя миссия и научная задача -->
+             <div class="bg-[#11141D] border border-[#0066cc]/40 rounded-2xl p-[24px] shadow-[0_0_20px_rgba(0,102,204,0.1)] flex flex-col gap-4">
+                 <div class="flex items-center gap-3 justify-start border-b border-[#0066cc]/20 pb-3">
+                     <!-- SVG Book Icon -->
+                     <svg class="w-6 h-6 text-[#0066cc] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.168.477 4 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.168.477-4 1.253" />
+                     </svg>
+                     <h3 class="font-montserrat font-black text-[20px] tracking-tight text-white uppercase text-left">
+                         МОЯ МИССИЯ И НАУЧНАЯ ЗАДАЧА
+                     </h3>
+                 </div>
+                 <p class="text-[14px] text-zinc-300 font-medium leading-relaxed text-left">
+                     Моя миссия как исследователя заключается в преодолении межрегиональной асимметрии цифрового пространства ЦФО. Цель работы — переход от статичной прошлой статистики к дата-центричным методам управления, позволяющим оперативно выявлять лимитирующие факторы развития ИТ-кластеров на периферии.
+                 </p>
+             </div>
+
+         </section>
+
+        <!-- Вкладка: Этапы исследования (Темный премиальный дизайн с таймлайном) -->
+        <section id="tab-roadmap" class="tab-panel space-y-12" style="display: none;">
+            
+            <div class="text-center space-y-3">
+                <span class="bg-[#0066cc]/10 text-[#0066cc] text-xs font-extrabold uppercase px-3 py-1 rounded-full border border-[#0066cc]/25 tracking-widest animate-pulse-slow">
+                    Хронология проекта
+                </span>
+                <h2 class="font-montserrat font-black text-2xl md:text-3xl lg:text-4xl text-white tracking-tight uppercase">
+                    ЭТАПЫ НАУЧНОГО ИССЛЕДОВАНИЯ
+                </h2>
+                <p class="text-zinc-400 text-xs md:text-sm max-w-2xl mx-auto font-medium leading-relaxed">
+                    Поэтапный процесс разработки интеллектуальной СППР и проведения комплексного инвестиционного анализа регионов Центрального федерального округа РФ.
+                </p>
+            </div>
+
+            <!-- Двухколоночный макет для шкалы времени и 3D-маскота -->
+            <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-6">
+                
+                <!-- Левая колонка: Шкала времени -->
+                <div class="lg:col-span-9 w-full">
+                    <!-- Шкала времени (Timeline) -->
+            <div class="relative max-w-4xl mx-auto px-4 md:px-0 py-2">
+                <!-- Вертикальная направляющая линия -->
+                <div class="absolute left-6 md:left-1/2 top-0 bottom-0 w-0.5 bg-[#1A1F2C] transform -translate-x-1/2 rounded-full overflow-hidden">
+                    <div class="w-full h-full bg-gradient-to-b from-[#0066cc] via-[#0088ff] to-[#14B8A6] opacity-80"></div>
+                </div>
+
+                <!-- Блоки этапов -->
+                <div class="space-y-4">
+                    
+                    <!-- Этап 1 -->
+                    <div class="roadmap-block relative flex flex-col md:flex-row items-center transition-all duration-500 opacity-0 transform translate-y-8 select-none">
+                        <div class="absolute left-6 md:left-1/2 w-5 h-5 rounded-full bg-black border-4 border-[#0066cc] shadow-[0_0_12px_#0066cc] transform -translate-x-1/2 z-10 flex items-center justify-center">
+                            <div class="w-1 h-1 rounded-full bg-white"></div>
+                        </div>
+                        
+                        <div class="w-full md:w-[calc(50%-2rem)] ml-12 md:ml-0 md:mr-auto bg-[#11141D] border border-[#0066cc]/25 rounded-2xl p-4 hover:border-[#0066cc]/60 hover:shadow-[0_0_25px_rgba(0,102,204,0.15)] transition-all duration-300">
+                            <div class="flex items-center gap-3 border-b border-[#0066cc]/20 pb-2 mb-2">
+                                <div class="p-2 rounded-lg bg-[#0066cc]/10 text-[#0066cc]">
+                                    <!-- SVG Book Icon -->
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.168.477 4 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.168.477-4 1.253" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <span class="text-[9px] text-[#0066cc] font-extrabold uppercase tracking-widest block">Этап 1</span>
+                                    <h3 class="font-montserrat font-black text-xs md:text-sm text-white uppercase tracking-wide">
+                                        Теоретико-методологический фундамент
+                                    </h3>
+                                </div>
+                            </div>
+                            <p class="text-[11px] md:text-xs text-zinc-300 leading-relaxed font-medium">
+                                Изучение методологии многокритериального анализа решений (MCDA). Систематизация факторов цифровой зрелости регионов РФ и формирование понятийного аппарата ИТ-сектора как объекта инвестиций.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Этап 2 -->
+                    <div class="roadmap-block relative flex flex-col md:flex-row items-center transition-all duration-500 opacity-0 transform translate-y-8 select-none">
+                        <div class="absolute left-6 md:left-1/2 w-5 h-5 rounded-full bg-black border-4 border-[#0088ff] shadow-[0_0_12px_#0088ff] transform -translate-x-1/2 z-10 flex items-center justify-center">
+                            <div class="w-1 h-1 rounded-full bg-white"></div>
+                        </div>
+                        
+                        <div class="w-full md:w-[calc(50%-2rem)] ml-12 md:ml-auto bg-[#11141D] border border-[#0088ff]/25 rounded-2xl p-4 hover:border-[#0088ff]/60 hover:shadow-[0_0_25px_rgba(0,136,255,0.15)] transition-all duration-300">
+                            <div class="flex items-center gap-3 border-b border-[#0088ff]/20 pb-2 mb-2">
+                                <div class="p-2 rounded-lg bg-[#0088ff]/10 text-[#0088ff]">
+                                    <!-- SVG Chart Icon -->
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <span class="text-[9px] text-[#0088ff] font-extrabold uppercase tracking-widest block">Этап 2</span>
+                                    <h3 class="font-montserrat font-black text-xs md:text-sm text-white uppercase tracking-wide">
+                                        Эмпирический сбор и первичная аналитика
+                                    </h3>
+                                </div>
+                            </div>
+                            <p class="text-[11px] md:text-xs text-zinc-300 leading-relaxed font-medium">
+                                Сбор, очистка и верификация статистических показателей 18 субъектов ЦФО РФ за 2026 год. Формирование матрицы исходных данных (заработные платы, объем ИТ-вакансий, кадровая напряженность, уровень рыночной концентрации).
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Этап 3 -->
+                    <div class="roadmap-block relative flex flex-col md:flex-row items-center transition-all duration-500 opacity-0 transform translate-y-8 select-none">
+                        <div class="absolute left-6 md:left-1/2 w-5 h-5 rounded-full bg-black border-4 border-[#14B8A6] shadow-[0_0_12px_#14B8A6] transform -translate-x-1/2 z-10 flex items-center justify-center">
+                            <div class="w-1 h-1 rounded-full bg-white"></div>
+                        </div>
+                        
+                        <div class="w-full md:w-[calc(50%-2rem)] ml-12 md:ml-0 md:mr-auto bg-[#11141D] border border-[#14B8A6]/25 rounded-2xl p-4 hover:border-[#14B8A6]/60 hover:shadow-[0_0_25px_rgba(20,184,166,0.15)] transition-all duration-300">
+                            <div class="flex items-center gap-3 border-b border-[#14B8A6]/20 pb-2 mb-2">
+                                <div class="p-2 rounded-lg bg-[#14B8A6]/10 text-[#14B8A6]">
+                                    <!-- SVG Code Icon -->
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <span class="text-[9px] text-[#14B8A6] font-extrabold uppercase tracking-widest block">Этап 3</span>
+                                    <h3 class="font-montserrat font-black text-xs md:text-sm text-white uppercase tracking-wide">
+                                        Алгоритмизация и проектирование СППР
+                                    </h3>
+                                </div>
+                            </div>
+                            <p class="text-[11px] md:text-xs text-zinc-300 leading-relaxed font-medium">
+                                Математическое описание алгоритмов прямой и обратной Min-Max нормализации факторов. Реализация ядра системы на Python: расчет взвешенной линейно-аддитивной свертки, симуляция инновационной активности и внешних рисков.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Этап 4 -->
+                    <div class="roadmap-block relative flex flex-col md:flex-row items-center transition-all duration-500 opacity-0 transform translate-y-8 select-none">
+                        <div class="absolute left-6 md:left-1/2 w-5 h-5 rounded-full bg-black border-4 border-[#0066cc] shadow-[0_0_12px_#0066cc] transform -translate-x-1/2 z-10 flex items-center justify-center">
+                            <div class="w-1 h-1 rounded-full bg-white"></div>
+                        </div>
+                        
+                        <div class="w-full md:w-[calc(50%-2rem)] ml-12 md:ml-auto bg-[#11141D] border border-[#0066cc]/25 rounded-2xl p-4 hover:border-[#0066cc]/60 hover:shadow-[0_0_25px_rgba(0,102,204,0.15)] transition-all duration-300">
+                            <div class="flex items-center gap-3 border-b border-[#0066cc]/20 pb-2 mb-2">
+                                <div class="p-2 rounded-lg bg-[#0066cc]/10 text-[#0066cc]">
+                                    <!-- SVG Dashboard Icon -->
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <span class="text-[9px] text-[#0066cc] font-extrabold uppercase tracking-widest block">Этап 4</span>
+                                    <h3 class="font-montserrat font-black text-xs md:text-sm text-white uppercase tracking-wide">
+                                        Интерактивная визуализация и экспертиза
+                                    </h3>
+                                </div>
+                            </div>
+                            <p class="text-[11px] md:text-xs text-zinc-300 leading-relaxed font-medium">
+                                Развертывание интерактивного веб-портала. Интеграция аналитических панелей Plotly для динамического картографирования и 2D-картодиаграмм. Внедрение блоков интеллектуальной генерации управленческих решений.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                </div>
+
+                <!-- Правая колонка: 3D-Маскот автора без подписей -->
+                <div class="lg:col-span-3 lg:sticky lg:top-[120px] flex items-center justify-center select-none mt-8 lg:mt-0" style="perspective: 1000px;">
+                    <img src="/static/3B1642DD-A64A-414E-83FD-50541FEB7D39_1_105_c.jpeg" alt="mascot" class="w-64 h-auto md:w-80 object-contain transition-all duration-300" 
+                         style="mix-blend-mode: multiply; border-radius: 50%; border: 2px solid rgba(0, 102, 204, 0.3); aspect-ratio: 1 / 1; object-fit: cover; object-position: center 20%; filter: drop-shadow(0 0 10px rgba(0, 102, 204, 0.5)); transform: perspective(800px) rotateY(-5deg); transition: transform 0.3s ease; cursor: pointer;"
+                         onmouseover="this.style.transform='perspective(800px) rotateY(0deg) scale(1.05)';"
+                         onmouseout="this.style.transform='perspective(800px) rotateY(-5deg)';" />
+                </div>
+
+
+            </div>
+
+            <!-- Технологический стек проекта -->
+            <div class="bg-[#11141D] border border-[#0066cc]/25 rounded-2xl p-6 max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="text-center md:text-left">
+                    <h4 class="font-montserrat font-black text-xs uppercase text-white tracking-wider">
+                        ТЕХНОЛОГИЧЕСКИЙ СТЕК
+                    </h4>
+                    <p class="text-zinc-500 text-[10px] font-semibold mt-1">
+                        Инструментарий разработки интеллектуального ядра СППР
+                    </p>
+                </div>
+                
+                <div class="flex flex-wrap justify-center gap-3">
+                    <!-- Python Card -->
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-black border border-white/5 hover:border-amber-500/40 rounded-xl transition-all duration-300 select-none">
+                        <span class="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_6px_#f59e0b]"></span>
+                        <span class="text-[11px] font-montserrat font-black text-zinc-300">Python</span>
+                        <span class="text-[8px] font-mono text-zinc-500">Core</span>
+                    </div>
+                    <!-- Streamlit Card -->
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-black border border-white/5 hover:border-red-500/40 rounded-xl transition-all duration-300 select-none">
+                        <span class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_6px_#ef4444]"></span>
+                        <span class="text-[11px] font-montserrat font-black text-zinc-300">Streamlit</span>
+                        <span class="text-[8px] font-mono text-zinc-500">UI</span>
+                    </div>
+                    <!-- Pandas / NumPy Card -->
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-black border border-white/5 hover:border-blue-500/40 rounded-xl transition-all duration-300 select-none">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_6px_#3b82f6]"></span>
+                        <span class="text-[11px] font-montserrat font-black text-zinc-300">Pandas & NumPy</span>
+                        <span class="text-[8px] font-mono text-zinc-500">Analytics</span>
+                    </div>
+                    <!-- Plotly Card -->
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-black border border-white/5 hover:border-teal-500/40 rounded-xl transition-all duration-300 select-none">
+                        <span class="w-2 h-2 rounded-full bg-teal-500 shadow-[0_0_6px_#14b8a6]"></span>
+                        <span class="text-[11px] font-montserrat font-black text-zinc-300">Plotly.js</span>
+                        <span class="text-[8px] font-mono text-zinc-500">Graphics</span>
+                    </div>
+                </div>
+            </div>
+
+            
+            </section>
+
+
+        <!-- Вкладка 2: Инвест-Дашборд (Темный премиальный BI-дизайн) -->
+        <section id="tab-dashboard" class="tab-panel space-y-8" style="display: none;">
+            
+            <!-- ВЕРХНИЙ КОНТУР: Метрики быстрого реагирования -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Метрика 1 (Ярко-синяя) -->
+                <div class="bg-gradient-to-br from-[#0066cc]/30 to-blue-950/20 border border-[#0066cc]/40 rounded-2xl p-6 custom-shadow neon-border flex items-center justify-between transition-all duration-300 hover:scale-[1.02]">
+                    <div class="space-y-2">
+                        <span class="text-[10px] text-blue-300 font-extrabold uppercase tracking-widest">Совокупный ИТ-спрос округа</span>
+                        <div class="text-4xl font-montserrat font-black text-white tracking-tight leading-none">22 110</div>
+                        <p class="text-[10px] text-blue-200/60 font-semibold">актуальных вакансий в базе ЦФО</p>
+                    </div>
+                    <!-- Круговой SVG-график (Доля Москвы) -->
+                    <div class="relative flex items-center justify-center">
+                        <svg class="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-blue-950/40" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="text-[#0066cc]" stroke-width="4" stroke-dasharray="64.3, 100" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="absolute text-[10px] font-black text-white font-sans">64.3%</div>
+                    </div>
+                </div>
+
+                <!-- Метрика 2 (Оранжевая) -->
+                <div class="bg-gradient-to-br from-amber-500/20 to-amber-950/15 border border-amber-500/30 rounded-2xl p-6 custom-shadow flex items-center justify-between transition-all duration-300 hover:scale-[1.02]" style="box-shadow: 0 0 15px rgba(245, 158, 11, 0.08);">
+                    <div class="space-y-2">
+                        <span class="text-[10px] text-amber-300 font-extrabold uppercase tracking-widest">Макрорегиональная медианная ЗП</span>
+                        <div class="text-3xl font-montserrat font-black text-white tracking-tight leading-none">148 500 ₽</div>
+                        <p class="text-[10px] text-amber-200/60 font-semibold">средний ФОТ соискателя в округе</p>
+                    </div>
+                    <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center text-2xl font-bold">
+                        ₽
+                    </div>
+                </div>
+
+                <!-- Метрика 3 (Бирюзовая) -->
+                <div class="bg-gradient-to-br from-teal-500/20 to-teal-950/15 border border-teal-500/30 rounded-2xl p-6 custom-shadow flex items-center justify-between transition-all duration-300 hover:scale-[1.02]" style="box-shadow: 0 0 15px rgba(20, 184, 166, 0.08);">
+                    <div class="space-y-2">
+                        <span class="text-[10px] text-teal-300 font-extrabold uppercase tracking-widest">Средняя кадровая напряженность</span>
+                        <div class="text-4xl font-montserrat font-black text-white tracking-tight leading-none">4.1</div>
+                        <p class="text-[10px] text-teal-200/60 font-semibold">соискателей на одну ИТ-вакансию</p>
+                    </div>
+                    <div class="w-12 h-12 bg-teal-500/10 text-teal-400 rounded-full flex items-center justify-center text-2xl">
+                        👥
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                
+                <!-- ЛЕВАЯ КОЛОНКА: САЙДБАР (ПАНЕЛЬ ВЕСОВ) -->
+                <div class="lg:col-span-1 bg-[#1A1F2C]/60 border border-[#0066cc]/25 rounded-2xl p-6 custom-shadow flex flex-col gap-6 backdrop-blur-md sticky top-[150px] self-start">
+                    
+                    <div class="border-b border-[#0066cc]/20 pb-3">
+                        <h3 class="font-montserrat font-extrabold text-sm tracking-wide text-[#0066cc] flex items-center gap-2">
+                            <span>⚙️</span> ВЕСА КРИТЕРИЕВ
+                        </h3>
+                        <p class="text-[10px] text-zinc-400 mt-1">Интерактивный баланс модели</p>
+                    </div>
+
+                    <!-- Динамический Alert Валидации весов (с неоновым свечением) -->
+                    <div id="weights-alert" class="rounded-xl p-3 text-xs border transition-all duration-300">
+                        <!-- Наполняется динамически JS -->
+                    </div>
+
+                    <!-- Слайдеры весов -->
+                    <div class="space-y-5">
+                        
+                        <!-- 1. Кадры -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs font-bold text-zinc-300">
+                                <span>👥 Доступность кадров</span>
+                                <span id="val_cadres" class="text-white bg-[#0066cc]/30 px-2 py-0.5 rounded font-mono font-bold text-[11px] border border-[#0066cc]/40">0.35</span>
+                            </div>
+                            <input type="range" id="w_cadres" min="0.0" max="1.0" step="0.05" value="0.35" oninput="updateWeightsUI()">
+                            <p class="text-[9px] text-zinc-500 leading-tight">Вес фактора напряженности рынка труда</p>
+                        </div>
+                        
+                        <!-- 2. Экономика -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs font-bold text-zinc-300">
+                                <span>💰 Экономическая выгода</span>
+                                <span id="val_econ" class="text-white bg-[#0066cc]/30 px-2 py-0.5 rounded font-mono font-bold text-[11px] border border-[#0066cc]/40">0.25</span>
+                            </div>
+                            <input type="range" id="w_econ" min="0.0" max="1.0" step="0.05" value="0.25" oninput="updateWeightsUI()">
+                            <p class="text-[9px] text-zinc-500 leading-tight">Вес фактора медианной заработной платы (ФОТ)</p>
+                        </div>
+                        
+                        <!-- 3. Инфраструктура -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs font-bold text-zinc-300">
+                                <span>🏢 Инфраструктура (Среда)</span>
+                                <span id="val_infra" class="text-white bg-[#0066cc]/30 px-2 py-0.5 rounded font-mono font-bold text-[11px] border border-[#0066cc]/40">0.15</span>
+                            </div>
+                            <input type="range" id="w_infra" min="0.0" max="1.0" step="0.05" value="0.15" oninput="updateWeightsUI()">
+                            <p class="text-[9px] text-zinc-500 leading-tight">Вес концентрации вакансий и плотности бизнеса</p>
+                        </div>
+                        
+                        <!-- 4. Инновации -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs font-bold text-zinc-300">
+                                <span>🚀 Инновационная активность</span>
+                                <span id="val_innov" class="text-white bg-[#0066cc]/30 px-2 py-0.5 rounded font-mono font-bold text-[11px] border border-[#0066cc]/40">0.15</span>
+                            </div>
+                            <input type="range" id="w_innov" min="0.0" max="1.0" step="0.05" value="0.15" oninput="updateWeightsUI()">
+                            <p class="text-[9px] text-zinc-500 leading-tight">Вес спроса на научно-технические кадры</p>
+                        </div>
+                        
+                        <!-- 5. Риски -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs font-bold text-zinc-300">
+                                <span>⚠️ Стабильность среды / Риски</span>
+                                <span id="val_risks" class="text-white bg-[#0066cc]/30 px-2 py-0.5 rounded font-mono font-bold text-[11px] border border-[#0066cc]/40">0.10</span>
+                            </div>
+                            <input type="range" id="w_risks" min="0.0" max="1.0" step="0.05" value="0.10" oninput="updateWeightsUI()">
+                            <p class="text-[9px] text-zinc-500 leading-tight">Вес устойчивости и безопасности инвестиций</p>
+                        </div>
+
+                    </div>
+
+                    <!-- Кнопка быстрого сброса -->
+                    <button onclick="resetWeights()" class="w-full bg-[#0066cc]/10 hover:bg-[#0066cc]/25 border border-[#0066cc]/40 text-[10px] text-white py-2.5 rounded-xl transition-all font-bold uppercase tracking-wider mt-2">
+                        Сбросить веса
+                    </button>
+                    
+                </div>
+
+                <!-- ПРАВАЯ КОЛОНКА: РАБОЧЕЕ ПРОСТРАНСТВО ДАШБОРДА -->
+                <div class="lg:col-span-3 space-y-6">
+                    
+                    <!-- Центральный аналитический блок -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        
+                        <!-- Левая панель: Рейтинг регионов -->
+                        <div class="bg-[#1A1F2C] border border-[#0066cc]/20 rounded-2xl p-5 custom-shadow flex flex-col shadow-[0_0_15px_rgba(0,0,0,0.2)]">
+                            <div class="border-b border-[#0066cc]/15 pb-3 mb-4">
+                                <h3 class="font-montserrat font-extrabold text-sm text-white tracking-wide flex items-center gap-2">
+                                    <span>🏆</span> РЕЙТИНГ ПРИВЛЕКАТЕЛЬНОСТИ РЕГИОНОВ
+                                </h3>
+                                <p class="text-[9px] text-zinc-400 mt-1">Аддитивная свертка 18 регионов ЦФО РФ</p>
+                            </div>
+                            <div id="bar-chart" class="w-full h-[400px]"></div>
+                        </div>
+
+                        <!-- Средняя панель: Матрица позиционирования -->
+                        <div class="bg-[#1A1F2C] border border-[#0066cc]/20 rounded-2xl p-5 custom-shadow flex flex-col shadow-[0_0_15px_rgba(0,0,0,0.2)]">
+                            <div class="border-b border-[#0066cc]/15 pb-3 mb-4">
+                                <h3 class="font-montserrat font-extrabold text-sm text-white tracking-wide flex items-center gap-2">
+                                    <span>🎯</span> МАТРИЦА СТРАТЕГИЧЕСКОГО ПОЗИЦИОНИРОВАНИЯ
+                                </h3>
+                                <p class="text-[9px] text-zinc-400 mt-1">Координаты: Напряженность vs Медианная ЗП</p>
+                            </div>
+                            <div id="scatter-chart" class="w-full h-[400px]"></div>
+                        </div>
+
+                        <!-- Правая панель: Лепестковая диаграмма (Radar Chart) -->
+                        <div class="bg-[#1A1F2C] border border-[#0066cc]/20 rounded-2xl p-5 custom-shadow flex flex-col shadow-[0_0_15px_rgba(0,0,0,0.2)]">
+                            <div class="border-b border-[#0066cc]/15 pb-3 mb-4">
+                                <h3 class="font-montserrat font-extrabold text-sm text-white tracking-wide flex items-center gap-2">
+                                    <span>🕸️</span> ПРОФИЛЬ ИТ-ЗРЕЛОСТИ РЕГИОНА
+                                </h3>
+                                <p class="text-[9px] text-zinc-400 mt-1">Оценка по 5 ключевым осям субиндексов</p>
+                            </div>
+                            <div id="radar-chart" class="w-full h-[400px]"></div>
+                        </div>
+
+                    </div>
+
+                    <!-- Нижний блок: Экспресс-диагностика (Bottlenecks) -->
+                    <div class="bg-[#1A1F2C] border border-[#0066cc]/25 rounded-2xl p-6 custom-shadow shadow-[0_0_20px_rgba(0,102,204,0.1)] mt-6">
+                        <div class="border-b border-[#0066cc]/20 pb-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <h3 class="font-montserrat font-extrabold text-base text-[#0066cc] tracking-wide flex items-center gap-2">
+                                    <span>🧠</span> ЭКСПРЕСС-ДИАГНОСТИКА И АНАЛИЗ УЗКИХ МЕСТ
+                                </h3>
+                                <p class="text-xs text-zinc-400 mt-1">Интеллектуальная выработка локальных ИТ-рекомендаций</p>
+                            </div>
+                            <!-- Выпадающий список регионов -->
+                            <div class="flex items-center gap-3">
+                                <label for="region-select" class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Выбор региона:</label>
+                                <select id="region-select" onchange="loadRecommendation(this.value)" class="bg-[#11141D] border-2 border-[#0066cc]/45 text-sm font-semibold rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0066cc] cursor-pointer shadow-[0_0_10px_rgba(0,102,204,0.15)]">
+                                    <!-- Варианты вставляются через Python replace -->
+                                    {% for reg in regions %}
+                                        <option value="{{ reg }}">{{ reg }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Контент заключения -->
+                        <div id="recommendation-content" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                             <!-- Текст рекомендации -->
+                             <div class="md:col-span-2 flex flex-col justify-between gap-4">
+                                 <div id="rec-glow-card" class="rounded-2xl p-5 flex items-start gap-4 transition-all duration-300 border">
+                                     <!-- Динамический робот-помощник -->
+                                     <div id="robot-avatar" class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl font-bold flex-shrink-0 transition-all duration-300">
+                                         🤖
+                                     </div>
+                                     <div class="space-y-2">
+                                         <h4 class="font-montserrat font-extrabold text-sm text-white tracking-wide">Экспертное заключение ИИ</h4>
+                                         <p id="rec-text" class="text-xs md:text-sm text-zinc-300 leading-relaxed font-semibold">
+                                             <!-- Заполняется динамически JS -->
+                                         </p>
+                                     </div>
+                                 </div>
+
+                                 <div class="grid grid-cols-3 gap-4 text-center">
+                                     <div class="bg-[#11141D] border border-[#0066cc]/15 rounded-xl p-3">
+                                         <div class="text-[9px] text-zinc-500 font-bold uppercase tracking-wider font-sans">ФОТ соискателя</div>
+                                         <div id="rec-salary" class="text-sm font-black text-white mt-1">-</div>
+                                     </div>
+                                     <div class="bg-[#11141D] border border-[#0066cc]/15 rounded-xl p-3">
+                                         <div class="text-[9px] text-zinc-500 font-bold uppercase tracking-wider font-sans">ИТ-Вакансии</div>
+                                         <div id="rec-vacancies" class="text-sm font-black text-white mt-1">-</div>
+                                     </div>
+                                     <div class="bg-[#11141D] border border-[#0066cc]/15 rounded-xl p-3">
+                                         <div class="text-[9px] text-zinc-500 font-bold uppercase tracking-wider font-sans">Рыночная Напряженность</div>
+                                         <div id="rec-tension" class="text-sm font-black text-white mt-1">-</div>
+                                     </div>
+                                 </div>
+                             </div>
+
+                             <!-- Шкала субиндексов (Правая колонка) -->
+                             <div class="md:col-span-1 bg-[#11141D]/40 border border-[#0066cc]/15 rounded-2xl p-5 flex flex-col gap-4">
+                                 <h4 class="font-montserrat font-extrabold text-sm text-white tracking-wide border-b border-[#0066cc]/15 pb-2">Состояние субиндексов</h4>
+                                 <div id="subindices-list" class="space-y-3">
+                                     <!-- Заполняется динамически JS -->
+                                 </div>
+                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Кнопка скачивания PDF отчета -->
+                    <div class="flex justify-center mt-6">
+                        <button onclick="downloadPDFReport(this)" class="btn-pdf-download w-full flex items-center justify-center gap-3 bg-[#0066cc] border border-[#0066cc] shadow-[0_0_20px_rgba(0,102,204,0.4)] text-white font-montserrat font-black text-xs md:text-sm px-6 py-4 rounded-xl cursor-pointer hover:bg-[#0052a3] hover:border-[#0088ff] hover:shadow-[0_0_30px_rgba(0,102,204,0.6)] transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 select-none">
+                            <!-- SVG Download Icon or Spinner -->
+                            <span id="pdf-btn-icon">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                </svg>
+                            </span>
+                            <span id="pdf-btn-text">СКАЧАТЬ АНАЛИТИЧЕСКИЙ ОТЧЕТ ДЛЯ ИНВЕСТОРОВ</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+                           <!-- Вкладка 3: Методология и математический аппарат (Премиальная светлая тема в стиле Ant Design / Лендинга) -->
+        <section id="tab-methodology" class="tab-panel" style="display: none;">
+            
+            <!-- Основной контейнер-подложка в стиле Ant Design / Лендинга -->
+            <div class="max-w-5xl mx-auto bg-[#F3F4F6] text-slate-900 rounded-[28px] overflow-hidden shadow-[0_15px_50px_rgba(0,0,0,0.15)] border border-zinc-200/80 p-5 md:p-8 space-y-8 font-sans transition-all duration-300">
+                
+                <!-- 1. Верхний баннер в королевском синем цвете с маскотом -->
+                <div class="relative bg-[#1A45D1] rounded-[24px] p-6 md:p-10 flex flex-col md:flex-row items-center justify-between overflow-hidden shadow-lg border border-[#0052FF]/20 min-h-[300px]">
+                    <!-- Фоновое свечение/градиент -->
+                    <div class="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-[#0052FF]/30 blur-3xl pointer-events-none"></div>
+                    
+                    <!-- Левая часть: заголовки и кнопки -->
+                    <div class="md:w-3/5 space-y-4 text-left z-10">
+                        <div class="inline-block bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-extrabold uppercase px-3 py-1 rounded-full tracking-widest">
+                            Научно-исследовательский модуль
+                        </div>
+                        <h2 class="font-montserrat font-black text-2xl md:text-3.5xl lg:text-4xl text-white tracking-tight uppercase leading-none">
+                            <span class="text-[#E2F952] block">МЕТОДОЛОГИЯ И</span>
+                            МАТЕМАТИЧЕСКИЙ АППАРАТ
+                        </h2>
+                        <p class="text-zinc-100/90 text-xs md:text-sm font-medium leading-relaxed max-w-lg">
+                            Математическое обоснование моделей многокритериальной свертки, нормализации сырых параметров и алгоритмов имитации внешней среды.
+                        </p>
+                        <div class="flex flex-wrap gap-3 pt-2">
+                            <button onclick="switchTab('tab-dashboard', document.querySelector('[onclick*=\'tab-dashboard\']'))" class="bg-[#E2F952] hover:bg-[#d4ef25] text-slate-950 text-[11px] font-black uppercase px-6 py-3 rounded-full transition-all duration-300 shadow-md transform hover:scale-105 active:scale-95 cursor-pointer">
+                                Запустить анализ
+                            </button>
+                            <button onclick="switchTab('tab-roadmap', document.querySelector('[onclick*=\'tab-roadmap\']'))" class="border border-white/30 hover:border-white text-white text-[11px] font-black uppercase px-6 py-3 rounded-full transition-all duration-300 backdrop-blur-sm hover:bg-white/10 cursor-pointer">
+                                Этапы проекта
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Правая часть: Фото-маскот автора (как на макете) -->
+                    <div class="absolute right-0 bottom-0 top-0 w-2/5 hidden md:flex items-end justify-end pointer-events-none">
+                        <img src="/static/3B1642DD-A64A-414E-83FD-50541FEB7D39_1_105_c.jpeg" alt="Mascot" class="w-full h-full object-cover object-center translate-y-4" style="mask-image: linear-gradient(to top, transparent 5%, black 25%); -webkit-mask-image: linear-gradient(to top, transparent 5%, black 25%); transform: scale(1.15) rotate(-3deg); border-bottom-right-radius: 24px;">
+                    </div>
+                </div>
+
+                <!-- 2. Бегущая строка (рибон) с ИТ-критериями ЦФО -->
+                <div class="w-full overflow-hidden bg-white border-y border-zinc-200/80 py-3 relative select-none rounded-[16px] shadow-sm">
+                    <style>
+                        @keyframes marquee {
+                            0% { transform: translateX(0%); }
+                            100% { transform: translateX(-50%); }
+                        }
+                        .animate-marquee {
+                            display: flex;
+                            width: max-content;
+                            gap: 1.5rem;
+                            animation: marquee 30s linear infinite;
+                        }
+                        .animate-marquee:hover {
+                            animation-play-state: paused;
+                        }
+                    </style>
+                    <div class="animate-marquee">
+                        <span class="bg-[#F3F4F6] border border-zinc-300/60 text-zinc-800 text-[10px] font-black uppercase px-3.5 py-1 rounded-full shadow-sm">кадры (Доступность кадров)</span>
+                        <span class="bg-[#F3F4F6] border border-zinc-300/60 text-zinc-800 text-[10px] font-black uppercase px-3.5 py-1 rounded-full shadow-sm">экономика (Стоимость ФОТ)</span>
+                        <span class="bg-[#F3F4F6] border border-zinc-300/60 text-zinc-800 text-[10px] font-black uppercase px-3.5 py-1 rounded-full shadow-sm">инфраструктура (Зрелость среды)</span>
+                        <span class="bg-[#F3F4F6] border border-zinc-300/60 text-zinc-800 text-[10px] font-black uppercase px-3.5 py-1 rounded-full shadow-sm">инновации (Спрос / Вакансии)</span>
+                        <span class="bg-[#F3F4F6] border border-zinc-300/60 text-zinc-800 text-[10px] font-black uppercase px-3.5 py-1 rounded-full shadow-sm">риски (Внешние факторы)</span>
+                        <!-- Дублирование для бесконечной ленты -->
+                        <span class="bg-[#F3F4F6] border border-zinc-300/60 text-zinc-800 text-[10px] font-black uppercase px-3.5 py-1 rounded-full shadow-sm">кадры (Доступность кадров)</span>
+                        <span class="bg-[#F3F4F6] border border-zinc-300/60 text-zinc-800 text-[10px] font-black uppercase px-3.5 py-1 rounded-full shadow-sm">экономика (Стоимость ФОТ)</span>
+                        <span class="bg-[#F3F4F6] border border-zinc-300/60 text-zinc-800 text-[10px] font-black uppercase px-3.5 py-1 rounded-full shadow-sm">инфраструктура (Зрелость среды)</span>
+                        <span class="bg-[#F3F4F6] border border-zinc-300/60 text-zinc-800 text-[10px] font-black uppercase px-3.5 py-1 rounded-full shadow-sm">инновации (Спрос / Вакансии)</span>
+                        <span class="bg-[#F3F4F6] border border-zinc-300/60 text-zinc-800 text-[10px] font-black uppercase px-3.5 py-1 rounded-full shadow-sm">риски (Внешние факторы)</span>
+                    </div>
+                </div>
+
+                <!-- 3. Блок "СТРУКТУРА МАТЕМАТИЧЕСКИХ МОДЕЛЕЙ СППР" -->
+                <div class="text-center space-y-2 pt-4">
+                    <h3 class="font-montserrat font-black text-2xl md:text-3xl text-[#0F172A] tracking-tight uppercase">
+                        СТРУКТУРА МАТЕМАТИЧЕСКИХ МОДЕЛЕЙ СППР
+                    </h3>
+                    <p class="text-zinc-500 text-xs font-semibold uppercase tracking-wider">
+                        Интеграция нормализации, имитационного контура и аддитивной свертки критериев
+                    </p>
+                </div>
+
+                <!-- 4. Сетка из 6-ти карточек -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Карточка 1: Кислотно-желтая (АРХИТЕКТУРА) -->
+                    <div class="relative bg-[#E2F952] rounded-[24px] p-6 shadow-md border border-[#C5DC2F]/30 min-h-[280px] flex flex-col justify-between overflow-hidden transform hover:scale-[1.02] transition-all duration-300">
+                        <div class="space-y-3 z-10">
+                            <span class="bg-black/10 text-slate-950 text-[10px] font-black uppercase px-2.5 py-1 rounded-full border border-black/10">
+                                01 / Архитектура
+                            </span>
+                            <h4 class="font-montserrat font-black text-lg text-slate-950 uppercase tracking-tight leading-none mt-2">
+                                Архитектурный каркас
+                            </h4>
+                            <p class="text-slate-900 text-xs font-medium leading-relaxed text-left">
+                                В рамках проектирования и разработки инструментальных средств поддержки принятия решений мною был реализован программный модуль оценки инвестиционной привлекательности регионов Центрального федерального округа РФ. Для построения архитектуры веб-портала я применила современный стек веб-разработки, включающий в себя серверную часть на базе FastAPI на языке Python, а также интерактивный клиентский интерфейс на чистом JavaScript с Plotly.js и KaTeX.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Карточка 2: Прямая нормализация (Белая) -->
+                    <div class="relative bg-white rounded-[24px] p-6 shadow-md border border-zinc-200/80 min-h-[280px] flex flex-col justify-between overflow-hidden transform hover:scale-[1.02] transition-all duration-300">
+                        <div class="space-y-3 z-10">
+                            <span class="bg-[#F3F4F6] text-zinc-800 text-[10px] font-black uppercase px-2.5 py-1 rounded-full border border-zinc-200">
+                                02 / Моделирование
+                            </span>
+                            <h4 class="font-montserrat font-black text-lg text-slate-950 uppercase tracking-tight leading-none mt-2">
+                                Прямая нормализация
+                            </h4>
+                            <p class="text-zinc-600 text-xs font-medium leading-relaxed text-left">
+                                Математическое ядро спроектированной СППР базируется на методологии многокритериального анализа решений (MCDA). Для стимулирующих факторов, таких как доступность кадров (кадровая напряженность) и инфраструктурная концентрация вакансий, я применила формулу прямой Min-Max нормализации, приводящую сырые показатели к диапазону [0, 1] для сопоставимости.
+                            </p>
+                            <!-- Формула с зумом по клику -->
+                            <div class="zoomable-formula cursor-zoom-in bg-zinc-50 hover:bg-zinc-100 rounded-xl p-3.5 border border-zinc-200/60 transition-all duration-300 text-center my-2 font-mono text-sm font-bold text-slate-800" onclick="zoomFormula(this)">
+                                $$I = \frac{x - x_{min}}{x_{max} - x_{min}}$$
+                            </div>
+                        </div>
+                        
+                        <!-- Нижний индикатор с кнопкой -->
+                        <div class="flex items-center justify-end border-t border-zinc-100 pt-4 mt-4 z-10">
+                            <div onclick="zoomFormula(this.parentNode.parentNode.querySelector('.zoomable-formula'))" class="w-8 h-8 rounded-full bg-[#E2F952] text-slate-950 flex items-center justify-center transition-all duration-300 hover:rotate-45 shadow-sm cursor-pointer">
+                                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Карточка 3: Инвертированная нормализация (Белая) -->
+                    <div class="relative bg-white rounded-[24px] p-6 shadow-md border border-zinc-200/80 min-h-[280px] flex flex-col justify-between overflow-hidden transform hover:scale-[1.02] transition-all duration-300">
+                        <div class="space-y-3 z-10">
+                            <span class="bg-[#F3F4F6] text-zinc-800 text-[10px] font-black uppercase px-2.5 py-1 rounded-full border border-zinc-200">
+                                03 / Моделирование
+                            </span>
+                            <h4 class="font-montserrat font-black text-lg text-slate-950 uppercase tracking-tight leading-none mt-2">
+                                Инвертированная нормализация
+                            </h4>
+                            <p class="text-zinc-600 text-xs font-medium leading-relaxed text-left">
+                                Для дестимулирующих факторов, имеющих отрицательную корреляцию с инвестиционной привлекательностью региона (например, завышенная стоимость фонда оплаты труда (ФОТ), требующая дополнительных расходов инвестора), я применила инвертированную формулу нормализации, переводящую минимум ФОТ в максимальную оценку привлекательности.
+                            </p>
+                            <!-- Формула с зумом по клику -->
+                            <div class="zoomable-formula cursor-zoom-in bg-zinc-50 hover:bg-zinc-100 rounded-xl p-3.5 border border-zinc-200/60 transition-all duration-300 text-center my-2 font-mono text-sm font-bold text-slate-800" onclick="zoomFormula(this)">
+                                $$I = 1.0 - \frac{x - x_{min}}{x_{max} - x_{min}}$$
+                            </div>
+                        </div>
+                        
+                        <!-- Нижний индикатор с кнопкой -->
+                        <div class="flex items-center justify-end border-t border-zinc-100 pt-4 mt-4 z-10">
+                            <div onclick="zoomFormula(this.parentNode.parentNode.querySelector('.zoomable-formula'))" class="w-8 h-8 rounded-full bg-[#E2F952] text-slate-950 flex items-center justify-center transition-all duration-300 hover:rotate-45 shadow-sm cursor-pointer">
+                                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Карточка 4: Имитационный контур (Белая с водяным знаком маскота) -->
+                    <div class="relative bg-white rounded-[24px] p-6 shadow-md border border-zinc-200/80 min-h-[280px] flex flex-col justify-between overflow-hidden transform hover:scale-[1.02] transition-all duration-300">
+                        <!-- Водяной знак маскота автора в фоне (как на макете) -->
+                        <div class="absolute right-0 bottom-0 w-28 h-28 opacity-10 pointer-events-none select-none z-0">
+                            <img src="/static/3B1642DD-A64A-414E-83FD-50541FEB7D39_1_105_c.jpeg" alt="Watermark" class="w-full h-full object-cover rounded-full filter grayscale">
+                        </div>
+                        
+                        <div class="space-y-3 z-10">
+                            <span class="bg-[#F3F4F6] text-zinc-800 text-[10px] font-black uppercase px-2.5 py-1 rounded-full border border-zinc-200">
+                                04 / Имитация
+                            </span>
+                            <h4 class="font-montserrat font-black text-lg text-slate-950 uppercase tracking-tight leading-none mt-2">
+                                Алгоритмы имитации среды
+                            </h4>
+                            <p class="text-zinc-600 text-xs font-medium leading-relaxed text-left">
+                                Для моделирования динамических изменений внешней среды и учета скрытых параметров рынка труда мною были разработаны имитационные алгоритмы расчета субиндексов инновационной активности и внешних рисков. Имитация случайных колебаний спроса на научно-технические кадры строится на базе нормированного объема вакансий с добавлением шума. Внедрение контролируемых случайных возмущений выполнено с использованием линейного конгруэнтного генератора (LCG) с seed=16 для обеспечения воспроизводимости расчетов.
+                            </p>
+                        </div>
+                        
+                        <!-- Нижний индикатор с кнопкой -->
+                        <div class="flex items-center justify-end border-t border-zinc-100 pt-4 mt-4 z-10">
+                            <div onclick="zoomCard(this.parentNode.parentNode.innerHTML)" class="w-8 h-8 rounded-full bg-[#E2F952] text-slate-950 flex items-center justify-center transition-all duration-300 hover:rotate-45 shadow-sm cursor-pointer">
+                                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Карточка 5: Королевский синий (Многокритериальная свертка) -->
+                    <div class="relative bg-[#1A45D1] text-white rounded-[24px] p-6 shadow-md border border-[#0052FF]/20 min-h-[280px] flex flex-col justify-between overflow-hidden transform hover:scale-[1.02] transition-all duration-300">
+                        <div class="space-y-3 z-10">
+                            <span class="bg-white/10 text-white text-[10px] font-black uppercase px-2.5 py-1 rounded-full border border-white/10">
+                                05 / Интеграция
+                            </span>
+                            <h4 class="font-montserrat font-black text-lg text-white uppercase tracking-tight leading-none mt-2">
+                                Линейно-аддитивная свертка
+                            </h4>
+                            <p class="text-zinc-100/90 text-xs font-medium leading-relaxed text-left">
+                                Синтез обобщающего показателя привлекательности региона осуществляется на основе модели взвешенной линейно-аддитивной свертки. Интегральный индекс рассчитывается как отношение суммы произведений нормированных субиндексов на их весовые коэффициенты к сумме весов. Применение нормировочного знаменателя в формуле гарантирует математическую корректность расчетов при любых пользовательских весах.
+                            </p>
+                            <!-- Формула с зумом по клику -->
+                            <div class="zoomable-formula cursor-zoom-in bg-black/40 hover:bg-black/60 rounded-xl p-3.5 border border-white/10 transition-all duration-300 text-center my-2 font-mono text-sm font-bold text-[#E2F952]" onclick="zoomFormula(this)">
+                                $$K_{интеграл} = \frac{\sum_{j=1}^{5} I_j \cdot w_j}{\sum_{j=1}^{5} w_j}$$
+                            </div>
+                        </div>
+                        
+                        <!-- Нижний индикатор с кнопкой -->
+                        <div class="flex items-center justify-end border-t border-white/15 pt-4 mt-4 z-10">
+                            <div onclick="zoomFormula(this.parentNode.parentNode.querySelector('.zoomable-formula'))" class="w-8 h-8 rounded-full bg-[#E2F952] text-slate-950 flex items-center justify-center transition-all duration-300 hover:rotate-45 shadow-sm cursor-pointer">
+                                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Карточка 6: Надежность и рекомендации (Белая) -->
+                    <div class="relative bg-white rounded-[24px] p-6 shadow-md border border-zinc-200/80 min-h-[280px] flex flex-col justify-between overflow-hidden transform hover:scale-[1.02] transition-all duration-300">
+                        <div class="space-y-3 z-10">
+                            <span class="bg-[#F3F4F6] text-zinc-800 text-[10px] font-black uppercase px-2.5 py-1 rounded-full border border-zinc-200">
+                                06 / Контроль
+                            </span>
+                            <h4 class="font-montserrat font-black text-lg text-slate-950 uppercase tracking-tight leading-none mt-2">
+                                Экспертный контур и надежность
+                            </h4>
+                            <p class="text-zinc-600 text-xs font-medium leading-relaxed text-left">
+                                Завершающим этапом является функционирование экспертного контура, отвечающего за генерацию текстовых рекомендаций на основе выявленных лимитирующих факторов и формирование PDF-отчетов с помощью библиотеки FPDF2 в среде Python. В бэкенде FastAPI и клиенте JS реализованы алгоритмы перехвата исключений, валидации параметров и отказоустойчивости.
+                            </p>
+                        </div>
+                        
+                        <!-- Нижний индикатор с кнопкой -->
+                        <div class="flex items-center justify-end border-t border-zinc-100 pt-4 mt-4 z-10">
+                            <div onclick="zoomCard(this.parentNode.parentNode.innerHTML)" class="w-8 h-8 rounded-full bg-[#E2F952] text-slate-950 flex items-center justify-center transition-all duration-300 hover:rotate-45 shadow-sm cursor-pointer">
+                                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 5. Нижний широкий блок: Лепестковое сопоставление (соответствует карточкам отзывов/профилей внизу макета) -->
+                <div class="bg-white rounded-[24px] p-6 md:p-8 shadow-md border border-zinc-200/80 flex flex-col lg:flex-row items-center gap-8 transform hover:scale-[1.01] transition-all duration-300">
+                    <!-- Левая часть: SVG лепестковая диаграмма -->
+                    <div class="w-full lg:w-2/5 flex items-center justify-center bg-[#F8FAFC] border border-zinc-100 rounded-[20px] p-4 relative overflow-hidden group shadow-inner">
+                        <svg viewBox="0 0 200 200" class="w-44 h-44 md:w-48 md:h-48 filter drop-shadow-[0_4px_12px_rgba(0,102,204,0.15)] transition-transform duration-500 group-hover:scale-105">
+                            <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(15,23,42,0.04)" stroke-width="1.5"/>
+                            <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(15,23,42,0.04)" stroke-width="1.5"/>
+                            <circle cx="100" cy="100" r="40" fill="none" stroke="rgba(15,23,42,0.04)" stroke-width="1.5"/>
+                            <circle cx="100" cy="100" r="20" fill="none" stroke="rgba(15,23,42,0.04)" stroke-width="1.5"/>
+                            <!-- Axes lines -->
+                            <line x1="100" y1="20" x2="100" y2="180" stroke="rgba(15,23,42,0.06)" stroke-width="1.5"/>
+                            <line x1="20" y1="100" x2="180" y2="100" stroke="rgba(15,23,42,0.06)" stroke-width="1.5"/>
+                            <line x1="43.4" y1="43.4" x2="156.6" y2="156.6" stroke="rgba(15,23,42,0.04)" stroke-width="1.5"/>
+                            <line x1="43.4" y1="156.6" x2="156.6" y2="43.4" stroke="rgba(15,23,42,0.04)" stroke-width="1.5"/>
+                            <!-- Labels -->
+                            <text x="100" y="14" fill="#0F172A" font-size="7" font-weight="900" text-anchor="middle" font-family="sans-serif">КАДРЫ</text>
+                            <text x="186" y="103" fill="#0F172A" font-size="7" font-weight="900" text-anchor="start" font-family="sans-serif">ЭКОНОМИКА</text>
+                            <text x="150" y="172" fill="#0F172A" font-size="7" font-weight="900" text-anchor="middle" font-family="sans-serif">СРЕДА</text>
+                            <text x="50" y="172" fill="#0F172A" font-size="7" font-weight="900" text-anchor="middle" font-family="sans-serif">ИННОВАЦИИ</text>
+                            <text x="14" y="103" fill="#0F172A" font-size="7" font-weight="900" text-anchor="end" font-family="sans-serif">СТАБИЛЬНОСТЬ</text>
+                            <!-- Region Profile polygon (Blue) -->
+                            <polygon points="100,36 156,100 128,128 80,120 40,100" fill="rgba(26,69,209,0.18)" stroke="#1A45D1" stroke-width="2.5" />
+                            <!-- Average benchmark polygon (Lime Green) -->
+                            <polygon points="100,44 140,100 135,135 75,125 50,100" fill="none" stroke="#C5DC2F" stroke-dasharray="3,3" stroke-width="2" />
+                        </svg>
+                    </div>
+                    
+                    <!-- Правая часть: Описание профильного сопоставления с метриками (как на макете) -->
+                    <div class="w-full lg:w-3/5 space-y-4 text-left">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-[#1A45D1]/10 text-[#1A45D1] text-[10px] font-black uppercase px-2.5 py-1 rounded-full">
+                                07 / Визуализация
+                            </span>
+                        </div>
+                        <h4 class="font-montserrat font-black text-xl text-slate-950 uppercase tracking-tight leading-none">
+                            Профильное сопоставление (Бенчмаркинг)
+                        </h4>
+                        
+                        <!-- Сетка с метриками в стиле Ant Design / Лендинга -->
+                        <div class="grid grid-cols-3 gap-4 py-2 border-y border-zinc-100">
+                            <div>
+                                <div class="text-xs text-zinc-400 font-bold uppercase tracking-wider">Осей</div>
+                                <div class="text-2xl font-montserrat font-black text-[#1A45D1] mt-0.5">5</div>
+                                <div class="text-[9px] text-zinc-500 font-medium">субиндексов</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-zinc-400 font-bold uppercase tracking-wider">Регионов</div>
+                                <div class="text-2xl font-montserrat font-black text-[#1A45D1] mt-0.5">18</div>
+                                <div class="text-[9px] text-zinc-500 font-medium">субъектов ЦФО</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-zinc-400 font-bold uppercase tracking-wider">Максимум</div>
+                                <div class="text-2xl font-montserrat font-black text-[#1A45D1] mt-0.5">1.00</div>
+                                <div class="text-[9px] text-zinc-500 font-medium">оценка зрелости</div>
+                            </div>
+                        </div>
+
+                        <p class="text-zinc-600 text-xs font-medium leading-relaxed text-left">
+                            Для повышения качества визуальной аналитики и быстрого проведения сравнительного анализа в систему был внедрен специализированный аналитический модуль профильного сопоставления на основе лепестковых диаграмм. Диаграмма визуализирует пятимерный вектор ИТ-зрелости выбранного субъекта РФ, позволяя наглядно сопоставить его текущий профиль со средними показателями по всему Центральному федеральному округу. Динамический контур региона окрашен в контрастный синий цвет с полупрозрачной заливкой, а усредненный профиль макрорегиона отображается пунктирной бирюзовой линией, что способствует моментальному считыванию «узких мест» в инфраструктурной или кадровой среде территории.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ПОДВАЛ (FOOTER) -->
+    <footer class="bg-black border-t border-[#0066cc]/10 py-6 px-6 md:px-12 text-center text-xs text-gray-500 mt-auto">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 animate-pulse">
+            <div>
+                © 2026 СППР «Инвестиционный паспорт регионов ЦФО РФ». Все права защищены.
+            </div>
+            <div class="font-semibold flex items-center gap-1 font-montserrat tracking-wide">
+                Разработано Шутовой Е.Д. в БГТУ «Военмех» им. Д.Ф. Устинова
+            </div>
+        </div>
+    </footer>
+
+    <!-- ЛОГИКА ВЗАИМОДЕЙСТВИЯ (JAVASCRIPT) -->
+    <script>
+        // ИМПОРТ ДАТАСЕТА ИЗ БЭКЕНДА FASTAPI
+        const rawData = {{ data_json | safe }};
+
+        // Векторы исходных данных
+        const regions = rawData["Регион"];
+        const salaries = rawData["Зарплата"];
+        const vacancies = rawData["Вакансии"];
+        const tensions = rawData["Напряженность"];
+        const concentrations = rawData["Концентрация"];
+
+        // Нахождение экстремумов
+        const salMin = Math.min(...salaries), salMax = Math.max(...salaries);
+        const vacMin = Math.min(...vacancies), vacMax = Math.max(...vacancies);
+        const tenMin = Math.min(...tensions), tenMax = Math.max(...tensions);
+        const concMin = Math.min(...concentrations), concMax = Math.max(...concentrations);
+
+        // Генератор псевдослучайных чисел LCG для воспроизводимости осей шума (seed=16)
+        function LCG(seed) {
+            let state = seed;
+            return function() {
+                state = (1664525 * state + 1013904223) % 4294967296;
+                return state / 4294967296;
+            };
+        }
+        const nextRand = LCG(16);
+
+        // Предобработанная база данных регионов с субиндексами
+        const regionalDatabase = regions.map((name, i) => {
+            const sal = salaries[i];
+            const vac = vacancies[i];
+            const ten = tensions[i];
+            const conc = concentrations[i];
+
+            // 1. Min-Max нормализация Напряженности (прямая): I_кадры
+            const i_cadres = (ten - tenMin) / (tenMax - tenMin);
+
+            // 2. Min-Max нормализация Зарплаты (инвертированная): I_экономика
+            const i_econ = 1.0 - (sal - salMin) / (salMax - salMin);
+
+            // 3. Min-Max нормализация Концентрации (прямая): I_инфраструктура
+            const i_infra = (conc - concMin) / (concMax - concMin);
+
+            // 4. I_инновации (vacancies norm * 0.7 + noise uniform(0, 0.3))
+            const v_norm = (vac - vacMin) / (vacMax - vacMin);
+            const noise_innov = nextRand() * 0.3;
+            const i_innov = Math.min(1.0, Math.max(0.0, v_norm * 0.7 + noise_innov));
+
+            // 5. I_риски (1.0 - (i_infra * 0.4) - noise uniform(0, 0.2))
+            let i_risks;
+            if (name === "Белгородская область") {
+                i_risks = 0.15;
+                nextRand(); // удерживаем последовательность генератора
+            } else {
+                const noise_risks = nextRand() * 0.2;
+                i_risks = Math.min(1.0, Math.max(0.0, 1.0 - (i_infra * 0.4) - noise_risks));
+            }
+
+            return {
+                region: name,
+                salary: sal,
+                vacancies: vac,
+                tension: ten,
+                concentration: conc,
+                i_cadres: parseFloat(i_cadres.toFixed(4)),
+                i_econ: parseFloat(i_econ.toFixed(4)),
+                i_infra: parseFloat(i_infra.toFixed(4)),
+                i_innov: parseFloat(i_innov.toFixed(4)),
+                i_risks: parseFloat(i_risks.toFixed(4))
+            };
+        });
+
+        // Глобальный буфер текущих результатов свертки
+        let currentCalculatedResults = [];
+
+        // Инициализация при загрузке страницы
+        document.addEventListener("DOMContentLoaded", function() {
+            // Загружаем начальные рейтинги по умолчанию
+            updateWeightsUI();
+            
+            // Загружаем рекомендацию для первого региона в списке
+            const initialRegion = document.getElementById("region-select").value;
+            if (initialRegion) {
+                loadRecommendation(initialRegion);
+            }
+        });
+
+        // Функция переключения вкладок с плавной сменой тем (Dark/Light)
+        function switchTab(tabId, buttonElement) {
+            const body = document.body;
+            const header = document.querySelector('header');
+            const footer = document.querySelector('footer');
+            
+            // Сброс активного стиля всех кнопок вкладок
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn py-4 px-1 font-semibold text-xs md:text-sm tracking-wider uppercase transition-all border-b-2 border-transparent text-gray-500 hover:text-[#0066cc]";
+            });
+            // Сброс анимационных классов для дорожной карты при смене вкладки
+            document.querySelectorAll('.roadmap-block').forEach(block => {
+                block.classList.remove('opacity-100', 'translate-y-0');
+                block.classList.add('opacity-0', 'translate-y-8');
+            });
+    
+            
+            if (tabId === 'tab-home') {
+                // ТЕМНЫЙ НЕО-БРУТАЛИЗМ
+                body.className = "bg-black text-white font-sans min-h-screen flex flex-col antialiased transition-colors duration-500";
+                header.className = "bg-black border-b border-[#0066cc]/30 py-4 px-6 md:px-12 sticky top-0 z-40 custom-shadow transition-all duration-500";
+                footer.className = "bg-black border-t border-[#0066cc]/10 py-6 px-6 md:px-12 text-center text-xs text-gray-500 mt-auto transition-colors duration-500";
+                
+                buttonElement.className = "tab-btn py-4 px-1 font-semibold text-xs md:text-sm tracking-wider uppercase transition-all border-b-2 border-[#0066cc] text-[#0066cc]";
+            } else {
+                // ПРЕМИНАЛЬНЫЙ ТЕМНО-СИНИЙ BI-ДИЗАЙН ДЛЯ ДАШБОРДА И МЕТОДОЛОГИИ
+                body.className = "bg-[#11141D] text-white font-sans min-h-screen flex flex-col antialiased transition-colors duration-500";
+                header.className = "bg-[#1A1F2C] border-b border-[#0066cc]/30 py-4 px-6 md:px-12 sticky top-0 z-40 custom-shadow transition-all duration-500";
+                footer.className = "bg-[#1A1F2C] border-t border-[#0066cc]/10 py-6 px-6 md:px-12 text-center text-xs text-gray-500 mt-auto transition-colors duration-500";
+                
+                buttonElement.className = "tab-btn py-4 px-1 font-semibold text-xs md:text-sm tracking-wider uppercase transition-all border-b-2 border-[#0066cc] text-[#0066cc]";
+            }
+
+            // Скрываем все разделы
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.remove('active');
+                panel.style.display = 'none';
+            });
+            
+            // Показываем активный раздел
+            const activePanel = document.getElementById(tabId);
+            activePanel.classList.add('active');
+            activePanel.style.display = 'block';
+            
+            // Запуск анимации для блоков дорожной карты (staggered entry)
+            if (tabId === 'tab-roadmap') {
+                setTimeout(() => {
+                    document.querySelectorAll('.roadmap-block').forEach((block, idx) => {
+                        setTimeout(() => {
+                            block.classList.remove('opacity-0', 'translate-y-8');
+                            block.classList.add('opacity-100', 'translate-y-0');
+                        }, idx * 150);
+                    });
+                }, 100);
+            }
+    
+
+            // Перерисовываем Plotly графики
+            if (tabId === 'tab-dashboard') {
+                setTimeout(() => {
+                    Plotly.Plots.resize('scatter-chart');
+                    Plotly.Plots.resize('bar-chart');
+                    Plotly.Plots.resize('radar-chart');
+                }, 100);
+            }
+        }
+
+        // Обновление UI при перетаскивании слайдеров и пересчет на стороне фронтенда
+        function updateWeightsUI() {
+            // Получаем числовые значения весов
+            const w_cadres = parseFloat(document.getElementById("w_cadres").value);
+            const w_econ = parseFloat(document.getElementById("w_econ").value);
+            const w_infra = parseFloat(document.getElementById("w_infra").value);
+            const w_innov = parseFloat(document.getElementById("w_innov").value);
+            const w_risks = parseFloat(document.getElementById("w_risks").value);
+
+            // Обновляем текстовые индикаторы на UI
+            document.getElementById("val_cadres").innerText = w_cadres.toFixed(2);
+            document.getElementById("val_econ").innerText = w_econ.toFixed(2);
+            document.getElementById("val_infra").innerText = w_infra.toFixed(2);
+            document.getElementById("val_innov").innerText = w_innov.toFixed(2);
+            document.getElementById("val_risks").innerText = w_risks.toFixed(2);
+
+            const sum = w_cadres + w_econ + w_infra + w_innov + w_risks;
+            const roundedSum = sum.toFixed(2);
+
+            // Обновляем Alert валидации с неоновым свечением
+            const alertElement = document.getElementById("weights-alert");
+            if (Math.abs(sum - 1.0) < 0.001) {
+                alertElement.className = "rounded-xl p-3 text-xs border transition-all duration-300 bg-green-950/40 border-green-500/50 text-green-300 font-bold shadow-[0_0_15px_rgba(34,197,94,0.25)]";
+                alertElement.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm">✅</span>
+                        <div>
+                            <div class="font-extrabold uppercase text-[10px]">Веса сбалансированы</div>
+                            <div class="text-[9px] opacity-75 mt-0.5">Сумма весов критериев составляет ровно 1.00.</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                alertElement.className = "rounded-xl p-3 text-xs border transition-all duration-300 bg-red-950/40 border-red-500/50 text-red-300 font-bold shadow-[0_0_15px_rgba(239,68,68,0.25)]";
+                alertElement.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm">⚠️</span>
+                        <div>
+                            <div class="font-extrabold uppercase text-[10px]">Дисбаланс весов (${roundedSum})</div>
+                            <div class="text-[9px] opacity-75 mt-0.5">Сумма должна равняться 1.00. Калькулятор автоматически отнормирует индекс.</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // МАТЕМАТИЧЕСКАЯ СВЕРТКА НА СТОРОНЕ ФРОНТЕНДА
+            const divisor = sum > 0 ? sum : 1.0;
+            
+            const results = regionalDatabase.map(regData => {
+                const weightedSum = (
+                    regData.i_cadres * w_cadres +
+                    regData.i_econ * w_econ +
+                    regData.i_infra * w_infra +
+                    regData.i_innov * w_innov +
+                    regData.i_risks * w_risks
+                );
+                const integralIndex = weightedSum / divisor;
+                
+                return {
+                    ...regData,
+                    integral_index: parseFloat(integralIndex.toFixed(4))
+                };
+            });
+
+            // Кэшируем для экспертного заключения
+            currentCalculatedResults = results;
+
+            // Формируем структуры данных для графиков
+            const sortedResults = [...results].sort((a, b) => b.integral_index - a.integral_index);
+            const reverseSortedResults = [...results].sort((a, b) => a.integral_index - b.integral_index);
+
+            const plots = {
+                scatter: {
+                    x: results.map(r => r.tension),
+                    y: results.map(r => r.salary),
+                    size: results.map(r => Math.max(12, Math.min(65, r.vacancies / 180))),
+                    raw_size: results.map(r => r.vacancies),
+                    color: results.map(r => r.integral_index),
+                    text: results.map(r => r.region),
+                    i_cadres: results.map(r => r.i_cadres),
+                    i_econ: results.map(r => r.i_econ),
+                    i_infra: results.map(r => r.i_infra),
+                    i_innov: results.map(r => r.i_innov),
+                    i_risks: results.map(r => r.i_risks)
+                },
+                bar: {
+                    x: reverseSortedResults.map(r => r.integral_index),
+                    y: reverseSortedResults.map(r => r.region),
+                    color: reverseSortedResults.map(r => r.integral_index)
+                }
+            };
+
+            // Отрисовываем графики Plotly
+            renderCharts(plots);
+
+            // Обновляем метрики на текущем выбранном регионе
+            const selectedRegion = document.getElementById("region-select").value;
+            if (selectedRegion) {
+                loadRecommendation(selectedRegion);
+            }
+        }
+
+        // Кнопка быстрого сброса
+        function resetWeights() {
+            document.getElementById("w_cadres").value = 0.35;
+            document.getElementById("w_econ").value = 0.25;
+            document.getElementById("w_infra").value = 0.15;
+            document.getElementById("w_innov").value = 0.15;
+            document.getElementById("w_risks").value = 0.10;
+            updateWeightsUI();
+        }
+
+        // Отрисовка графиков Plotly в ТЕМНОМ КОРПОРАТИВНОМ СТИЛЕ
+        function renderCharts(plotData) {
+            
+            // 1. Матрица стратегического позиционирования (Scatter 2D)
+            const scatterData = [{
+                x: plotData.scatter.x,
+                y: plotData.scatter.y,
+                mode: 'markers',
+                marker: {
+                    size: plotData.scatter.size,
+                    color: plotData.scatter.color,
+                    colorscale: [
+                        [0.0, '#3B82F6'],   // Глубокий синий
+                        [0.5, '#06B6D4'],   // Яркий бирюзовый (cyan)
+                        [1.0, '#10B981']    // Неоново-зеленый (emerald)
+                    ],
+                    showscale: true,
+                    colorbar: {
+                        title: {
+                            text: 'Индекс',
+                            font: { color: '#94A3B8', size: 9, family: 'Inter' }
+                        },
+                        thickness: 10,
+                        ticks: 'outside',
+                        tickfont: { color: '#94A3B8', size: 8 }
+                    },
+                    line: {
+                        color: '#1A1F2C',
+                        width: 1.5
+                    }
+                },
+                customdata: plotData.scatter.text.map((_, i) => [
+                    plotData.scatter.text[i],             // [0] Название региона
+                    plotData.scatter.color[i].toFixed(3),  // [1] Интегральный индекс
+                    plotData.scatter.i_cadres[i].toFixed(3), // [2] I_кадры
+                    plotData.scatter.i_econ[i].toFixed(3),   // [3] I_экон
+                    plotData.scatter.i_infra[i].toFixed(3),  // [4] I_среда
+                    plotData.scatter.i_innov[i].toFixed(3),  // [5] I_инновации
+                    plotData.scatter.i_risks[i].toFixed(3),  // [6] I_риски
+                    plotData.scatter.raw_size[i]             // [7] Число вакансий
+                ]),
+                hovertemplate: 
+                    '<b>%{customdata[0]}</b><br><br>' +
+                    '• Коэффициент напряженности: %{x:.2f}<br>' +
+                    '• Медианная зарплата: %{y:,.0f} руб.<br>' +
+                    '• Интегральный индекс: %{customdata[1]}<br>' +
+                    '• Кадровый субиндекс: %{customdata[2]}<br>' +
+                    '• Экономический субиндекс: %{customdata[3]}<br>' +
+                    '• Инфраструктурный субиндекс: %{customdata[4]}<br>' +
+                    '• Число вакансий: %{customdata[7]} ед.<br>' +
+                    '<extra></extra>'
+            }];
+
+            const scatterLayout = {
+                font: { family: 'Inter, sans-serif', size: 9, color: '#94A3B8' },
+                margin: { l: 60, r: 10, t: 10, b: 50 },
+                separators: ' ,',
+                xaxis: { 
+                    title: { text: 'Напряженность рынка труда (резюме/вак.)', font: { size: 9, color: '#94A3B8' } },
+                    gridcolor: 'rgba(255, 255, 255, 0.05)',
+                    zeroline: false,
+                    tickfont: { color: '#94A3B8', size: 8 }
+                },
+                yaxis: { 
+                    title: { text: 'Медианная зарплата соискателей (руб.)', font: { size: 9, color: '#94A3B8' } },
+                    gridcolor: 'rgba(255, 255, 255, 0.05)',
+                    zeroline: false,
+                    tickformat: ',.0f',
+                    tickfont: { color: '#94A3B8', size: 8 }
+                },
+                paper_bgcolor: '#1A1F2C',
+                plot_bgcolor: '#1A1F2C',
+                showlegend: false,
+                hoverlabel: { 
+                    bgcolor: '#11141D', 
+                    font: { color: '#FFFFFF', family: 'Inter', size: 10 },
+                    bordercolor: '#0066cc'
+                }
+            };
+
+            Plotly.react('scatter-chart', scatterData, scatterLayout, {responsive: true, displayModeBar: false});
+
+            // 2. Горизонтальный бар-чарт рейтинга (Bar Chart)
+            const barData = [{
+                x: plotData.bar.x,
+                y: plotData.bar.y,
+                type: 'bar',
+                orientation: 'h',
+                marker: {
+                    color: plotData.bar.color,
+                    colorscale: [
+                        [0.0, '#1E3A8A'],   // Темно-синий
+                        [0.5, '#0066cc'],   // Неоново-синий
+                        [1.0, '#14B8A6']    // Бирюзовый
+                    ]
+                },
+                text: plotData.bar.x.map(v => v.toFixed(3)),
+                textposition: 'inside',
+                insidetextanchor: 'end',
+                textfont: {
+                    color: '#FFFFFF',
+                    weight: 'bold',
+                    size: 9,
+                    family: 'Inter'
+                },
+                hovertemplate: 'Регион: <b>%{y}</b><br>Интегральный индекс: <b>%{x:.3f}</b><extra></extra>'
+            }];
+
+            const barLayout = {
+                font: { family: 'Inter, sans-serif', size: 9, color: '#94A3B8' },
+                margin: { l: 120, r: 15, t: 10, b: 30 },
+                xaxis: { 
+                    title: { text: 'Интегральный Индекс', font: { size: 9, color: '#94A3B8' } },
+                    gridcolor: '#262F40',
+                    range: [0, 1.05],
+                    tickfont: { color: '#94A3B8', size: 8 }
+                },
+                yaxis: { 
+                    gridcolor: 'rgba(0,0,0,0)',
+                    tickfont: { size: 9, color: '#FFFFFF', weight: 'bold' }
+                },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                showlegend: false,
+                hoverlabel: { 
+                    bgcolor: '#11141D', 
+                    font: { color: '#FFFFFF' },
+                    bordercolor: '#0066cc'
+                }
+            };
+
+            Plotly.react('bar-chart', barData, barLayout, {responsive: true, displayModeBar: false});
+        }
+
+        // Выдача экспертной рекомендации по выбранному региону (на фронтенде с динамической неоновой карточкой)
+        function loadRecommendation(regionName) {
+            const regData = currentCalculatedResults.find(r => r.region === regionName);
+            if (!regData) return;
+
+            // Находим лимитирующий субиндекс (минимальный)
+            const indices = [
+                { key: "i_cadres", name: "Доступность кадров", val: regData.i_cadres },
+                { key: "i_econ", name: "Экономическая выгода (ФОТ)", val: regData.i_econ },
+                { key: "i_infra", name: "Инфраструктурная зрелость (Среда)", val: regData.i_infra },
+                { key: "i_innov", name: "Инновационная активность", val: regData.i_innov },
+                { key: "i_risks", name: "Стабильность среды / Риски", val: regData.i_risks }
+            ];
+
+            const limitingFactor = indices.reduce((min, item) => item.val < min.val ? item : min, indices[0]);
+
+            // Текст рекомендации на основе лимитирующего фактора
+            let recommendationText = "";
+            let accentColorClass = "";
+            let glowGradients = "";
+            let robotAvatarGlow = "";
+            
+            if (limitingFactor.key === "i_econ") {
+                recommendationText = "Рынок труда территории перегрет. Рекомендуется вынос линейных ИТ-подразделений на периферию округа для оптимизации ФОТ.";
+                accentColorClass = "text-red-400";
+                glowGradients = "from-red-950/20 to-zinc-950/40 border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.15)]";
+                robotAvatarGlow = "bg-red-500/10 text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.4)]";
+            } else if (limitingFactor.key === "i_cadres") {
+                recommendationText = "Острый дефицит соискателей. Необходим запуск программ переподготовки и расширение ИТ-квот в вузах.";
+                accentColorClass = "text-amber-400";
+                glowGradients = "from-amber-950/20 to-zinc-950/40 border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.15)]";
+                robotAvatarGlow = "bg-amber-500/10 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.4)]";
+            } else if (limitingFactor.key === "i_infra" || limitingFactor.key === "i_innov") {
+                recommendationText = "Цифровая экосистема развита слабо. Рекомендуется введение льготных ставок по УСН (до 1%) для ИТ-бизнеса и гранты на строительство технопарков.";
+                accentColorClass = "text-blue-400";
+                glowGradients = "from-blue-950/20 to-zinc-950/40 border-blue-500/40 shadow-[0_0_15px_rgba(59,130,246,0.15)]";
+                robotAvatarGlow = "bg-blue-500/10 text-blue-400 shadow-[0_0_12px_rgba(59,130,246,0.4)]";
+            } else if (limitingFactor.key === "i_risks") {
+                recommendationText = "Повышенный уровень структурных рисков территории. Требуется внедрение специализированных региональных механизмов страхования активов.";
+                accentColorClass = "text-purple-400";
+                glowGradients = "from-purple-950/20 to-zinc-950/40 border-purple-500/40 shadow-[0_0_15px_rgba(168,85,247,0.15)]";
+                robotAvatarGlow = "bg-purple-500/10 text-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.4)]";
+            }
+
+            // Динамическое оформление карточки рекомендации
+            const recGlowCard = document.getElementById("rec-glow-card");
+            recGlowCard.className = `bg-gradient-to-r ${glowGradients} rounded-2xl p-5 flex items-start gap-4 transition-all duration-300 border`;
+            
+            const robotAvatar = document.getElementById("robot-avatar");
+            robotAvatar.className = `w-14 h-14 rounded-2xl flex items-center justify-center text-3xl font-bold flex-shrink-0 transition-all duration-300 ${robotAvatarGlow}`;
+
+            // Обновляем числовые показатели
+            document.getElementById("rec-salary").innerText = regData.salary.toLocaleString() + ' ₽';
+            document.getElementById("rec-vacancies").innerText = regData.vacancies.toLocaleString();
+            document.getElementById("rec-tension").innerText = regData.tension.toFixed(1) + ' рез/вак';
+
+            // Выводим текст рекомендации
+            document.getElementById("rec-text").innerHTML = `
+                Для региона <b>${regData.region}</b> наиболее критическим (лимитирующим) фактором выступает 
+                <span class="${accentColorClass} font-bold">«${limitingFactor.name}»</span> (значение субиндекса: <b>${limitingFactor.val.toFixed(3)}</b>).
+                <br><br>
+                <span class="text-white font-extrabold uppercase text-[11px] tracking-wide block mb-1">Рекомендация аналитика:</span> ${recommendationText}
+            `;
+
+            // Обновляем шкалу субиндексов с неоновым выделением лимитирующего фактора
+            const listContainer = document.getElementById("subindices-list");
+            let listHtml = "";
+            indices.forEach(item => {
+                const isLimiting = (item.key === limitingFactor.key);
+                let barColor = 'bg-[#0066cc]';
+                let textStyle = 'text-zinc-400 font-semibold';
+                let containerBorder = 'border-transparent';
+                
+                if (isLimiting) {
+                    textStyle = `${accentColorClass} font-extrabold`;
+                    containerBorder = `border-${limitingFactor.key === 'i_econ' ? 'red' : limitingFactor.key === 'i_cadres' ? 'amber' : limitingFactor.key === 'i_risks' ? 'purple' : 'blue'}-500/30 bg-[#11141D]`;
+                    barColor = limitingFactor.key === 'i_econ' ? 'bg-red-500' : limitingFactor.key === 'i_cadres' ? 'bg-amber-500' : limitingFactor.key === 'i_risks' ? 'bg-purple-500' : 'bg-blue-500';
+                }
+
+                listHtml += `
+                    <div class="p-2 border rounded-lg transition-all ${containerBorder}">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="${textStyle}">${item.name}</span>
+                            <span class="font-mono font-bold text-white">${item.val.toFixed(3)}</span>
+                        </div>
+                        <div class="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden">
+                            <div class="${barColor} h-1.5 rounded-full" style="width: ${item.val * 100}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            listContainer.innerHTML = listHtml;
+
+            // РАДАР-ЧАРТ (Radar Chart) ПРОФИЛЯ ИТ-ЗРЕЛОСТИ РЕГИОНА
+            const avg_cadres = currentCalculatedResults.reduce((sum, r) => sum + r.i_cadres, 0) / currentCalculatedResults.length;
+            const avg_econ = currentCalculatedResults.reduce((sum, r) => sum + r.i_econ, 0) / currentCalculatedResults.length;
+            const avg_infra = currentCalculatedResults.reduce((sum, r) => sum + r.i_infra, 0) / currentCalculatedResults.length;
+            const avg_innov = currentCalculatedResults.reduce((sum, r) => sum + r.i_innov, 0) / currentCalculatedResults.length;
+            const avg_risks = currentCalculatedResults.reduce((sum, r) => sum + r.i_risks, 0) / currentCalculatedResults.length;
+
+            const radarData = [
+                {
+                    type: 'scatterpolar',
+                    r: [
+                        regData.i_cadres,
+                        regData.i_econ,
+                        regData.i_infra,
+                        regData.i_innov,
+                        regData.i_risks,
+                        regData.i_cadres
+                    ],
+                    theta: ['Кадры', 'Экономика', 'Инфраструктура', 'Инновации', 'Стабильность', 'Кадры'],
+                    fill: 'toself',
+                    fillcolor: 'rgba(0, 102, 204, 0.15)',
+                    line: {
+                        color: '#0066cc',
+                        width: 2.5
+                    },
+                    name: regData.region,
+                    hovertemplate: 'Показатель: <b>%{theta}</b><br>Оценка: <b>%{r:.3f}</b><extra></extra>'
+                },
+                {
+                    type: 'scatterpolar',
+                    r: [
+                        avg_cadres,
+                        avg_econ,
+                        avg_infra,
+                        avg_innov,
+                        avg_risks,
+                        avg_cadres
+                    ],
+                    theta: ['Кадры', 'Экономика', 'Инфраструктура', 'Инновации', 'Стабильность', 'Кадры'],
+                    fill: 'none',
+                    line: {
+                        color: '#14B8A6',
+                        width: 2,
+                        dash: 'dash'
+                    },
+                    name: 'Среднее ЦФО',
+                    hovertemplate: 'Среднее ЦФО: <b>%{r:.3f}</b><extra></extra>'
+                }
+            ];
+
+            const radarLayout = {
+                polar: {
+                    bgcolor: 'rgba(0,0,0,0)',
+                    radialaxis: {
+                        visible: true,
+                        range: [0, 1.0],
+                        gridcolor: 'rgba(255, 255, 255, 0.08)',
+                        linecolor: 'rgba(255, 255, 255, 0.1)',
+                        tickfont: { color: '#94A3B8', size: 8 }
+                    },
+                    angularaxis: {
+                        gridcolor: 'rgba(255, 255, 255, 0.08)',
+                        linecolor: 'rgba(255, 255, 255, 0.1)',
+                        tickfont: { color: '#FFFFFF', size: 9, family: 'Inter, sans-serif' }
+                    }
+                },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                margin: { l: 40, r: 40, t: 30, b: 30 },
+                showlegend: true,
+                legend: {
+                    orientation: 'h',
+                    y: -0.15,
+                    x: 0.5,
+                    xanchor: 'center',
+                    font: { color: '#94A3B8', size: 9 }
+                }
+            };
+
+            Plotly.react('radar-chart', radarData, radarLayout, {responsive: true, displayModeBar: false});
+        }
+
+        // Zoom functionality for Methodology formula cards
+        function zoomFormula(element) {
+            const modal = document.getElementById("zoom-overlay");
+            const modalTarget = document.getElementById("zoom-target");
+            const modalContent = document.getElementById("zoom-content");
+            
+            // Копируем формулу в оверлей
+            modalTarget.innerHTML = element.innerHTML;
+            
+            // Увеличиваем масштаб формулы
+            const mathEl = modalTarget.querySelector('.katex-display');
+            if (mathEl) {
+                mathEl.style.fontSize = '2em';
+                mathEl.style.margin = '1.5em 0';
+            }
+            
+            // Открываем модальное окно
+            modal.classList.remove("hidden");
+            setTimeout(() => {
+                modal.classList.add("opacity-100");
+                modalContent.classList.remove("scale-95");
+                modalContent.classList.add("scale-100");
+            }, 10);
+        }
+
+        function zoomCard(contentHtml) {
+            const zoomOverlay = document.getElementById("zoom-overlay");
+            const zoomTarget = document.getElementById("zoom-target");
+            const zoomContent = document.getElementById("zoom-content");
+            
+            zoomTarget.innerHTML = contentHtml;
+            
+            // Hide zoom indicators in the zoomed modal
+            const indicators = zoomTarget.querySelectorAll(".text-\\[9px\\], span[class*='text-amber']");
+            indicators.forEach(el => {
+                if (el.textContent.includes('Кликните') || el.textContent.includes('Увеличить') || el.textContent.includes('Кликнуть')) {
+                    el.style.display = 'none';
+                }
+            });
+            
+            zoomOverlay.classList.remove("hidden");
+            setTimeout(() => {
+                zoomOverlay.classList.add("opacity-100");
+                zoomContent.classList.remove("scale-95");
+                zoomContent.classList.add("scale-100");
+            }, 10);
+        }
+
+        function closeZoom() {
+            const zoomOverlay = document.getElementById("zoom-overlay");
+            const zoomContent = document.getElementById("zoom-content");
+            
+            zoomOverlay.classList.remove("opacity-100");
+            zoomContent.classList.remove("scale-100");
+            zoomContent.classList.add("scale-95");
+            
+            setTimeout(() => {
+                zoomOverlay.classList.add("hidden");
+            }, 300);
+        }
+    
+        // PDF Report download function
+        function downloadPDFReport(button) {
+            const iconSpan = document.getElementById("pdf-btn-icon");
+            const textSpan = document.getElementById("pdf-btn-text");
+            
+            const originalIcon = iconSpan.innerHTML;
+            const originalText = textSpan.innerText;
+            
+            // Add loading spinner
+            iconSpan.innerHTML = `
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            `;
+            textSpan.innerText = "ГЕНЕРАЦИЯ PDF ОТЧЕТА...";
+            button.disabled = true;
+
+            const selectedRegion = document.getElementById("region-select").value;
+            const w_cadres = parseFloat(document.getElementById("w_cadres").value);
+            const w_econ = parseFloat(document.getElementById("w_econ").value);
+            const w_infra = parseFloat(document.getElementById("w_infra").value);
+            const w_innov = parseFloat(document.getElementById("w_innov").value);
+            const w_risks = parseFloat(document.getElementById("w_risks").value);
+
+            // Construct API url
+            const url = `/api/download_pdf?region=${encodeURIComponent(selectedRegion)}` +
+                        `&w_cadres=${w_cadres}` +
+                        `&w_econ=${w_econ}` +
+                        `&w_infra=${w_infra}` +
+                        `&w_innov=${w_innov}` +
+                        `&w_risks=${w_risks}`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error("Server error during PDF generation");
+                    return response.blob();
+                })
+                .then(blob => {
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = downloadUrl;
+                    a.download = `Investment_Report_${selectedRegion.replace(/\s+/g, "_")}_2026.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(downloadUrl);
+                    
+                    // Reset button state
+                    iconSpan.innerHTML = originalIcon;
+                    textSpan.innerText = originalText;
+                    button.disabled = false;
+                })
+                .catch(err => {
+                    console.error("PDF download error:", err);
+                    alert("Ошибка генерации PDF на сервере! Проверьте соединение с сервером.");
+                    iconSpan.innerHTML = originalIcon;
+                    textSpan.innerText = originalText;
+                    button.disabled = false;
+                });
+        }
+
+</script>
+
+    <!-- Zoom Modal Overlay for Formulas/Cards -->
+    <div id="zoom-overlay" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center hidden opacity-0 transition-opacity duration-300 select-none cursor-pointer" onclick="closeZoom()">
+        <div id="zoom-content" class="max-w-3xl w-full p-8 bg-[#11141D] border-2 border-[#0066cc]/40 rounded-2xl shadow-[0_0_50px_rgba(0,102,204,0.3)] transform scale-95 transition-transform duration-300 text-center relative cursor-default" onclick="event.stopPropagation()">
+            <!-- Close Button -->
+            <button class="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors text-xl font-bold cursor-pointer" onclick="closeZoom()">&times;</button>
+            <div id="zoom-target" class="text-white"></div>
+        </div>
+    </div>
+
+
+
+</body>
+</html>
