@@ -485,7 +485,90 @@
         }
         
         .light-theme .bg-\[\#1A1F2C\] {
-            background-color: #cbd5e1 !important;
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05) !important;
+        }
+        
+        .light-theme .bg-\[\#1A1F2C\] .text-white,
+        .light-theme .bg-\[\#1A1F2C\]\/60 .text-white,
+        .light-theme .bg-\[\#11141D\] .text-white,
+        .light-theme .bg-zinc-950\/40 .text-white,
+        .light-theme #rec-glow-card .text-white,
+        .light-theme #rec-glow-card h4,
+        .light-theme #subindices-list .text-white,
+        .light-theme h2.text-white,
+        .light-theme h3.text-white,
+        .light-theme h4.text-white {
+            color: #0f172a !important;
+        }
+
+        .light-theme .bg-black\/60 {
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            border-color: rgba(0, 102, 204, 0.2) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .light-theme .text-\[\#14B8A6\] {
+            color: #0f766e !important;
+        }
+
+        .light-theme .text-red-400 {
+            color: #b91c1c !important;
+        }
+        .light-theme .text-amber-400 {
+            color: #b45309 !important;
+        }
+        .light-theme .text-blue-400 {
+            color: #1d4ed8 !important;
+        }
+        .light-theme .text-purple-400 {
+            color: #7e22ce !important;
+        }
+        
+        .light-theme .text-amber-200\/60 {
+            color: #78350f !important;
+        }
+        .light-theme .text-teal-200\/60 {
+            color: #0d9488 !important;
+        }
+
+        .light-theme .border-\[\#0066cc\]\/40,
+        .light-theme .border-\[\#0066cc\]\/30,
+        .light-theme .border-\[\#0066cc\]\/25,
+        .light-theme .border-\[\#0066cc\]\/20,
+        .light-theme .border-\[\#0066cc\]\/15 {
+            border-color: rgba(0, 102, 204, 0.2) !important;
+        }
+
+        .light-theme span[id^="val_"] {
+            background-color: rgba(0, 102, 204, 0.1) !important;
+            color: #0066cc !important;
+            border-color: rgba(0, 102, 204, 0.25) !important;
+        }
+
+        .light-theme #rec-glow-card {
+            background-image: linear-gradient(to right, #f8fafc, #f1f5f9) !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .light-theme #subindices-list .bg-zinc-800 {
+            background-color: #e2e8f0 !important;
+        }
+
+        .light-theme #theme-toggle-btn {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #334155 !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+        }
+        .light-theme #theme-toggle-btn:hover {
+            background-color: #f8fafc !important;
+            border-color: #94a3b8 !important;
+        }
+        .light-theme #theme-toggle-btn span {
+            color: #334155 !important;
         }
 </style>
 </head>
@@ -545,8 +628,9 @@
                         МЕТОДОЛОГИЯ И МАТЕМАТИЧЕСКИЙ АППАРАТ
                     </button>
                 </nav>
-                <button onclick="toggleTheme()" id="theme-toggle-btn" class="p-2 rounded-xl border border-[#0066cc]/30 bg-zinc-950 hover:bg-zinc-900 text-yellow-400 hover:text-white transition-all duration-300 shadow-[0_0_10px_rgba(0,102,204,0.15)] flex items-center justify-center w-9 h-9" title="Сменить тему оформления">
-                    <span id="theme-icon" class="text-sm">☀️</span>
+                <button onclick="toggleTheme()" id="theme-toggle-btn" class="px-4 py-2 rounded-xl border border-[#0066cc]/40 bg-[#0D1117] hover:bg-zinc-900 text-yellow-400 hover:text-yellow-300 transition-all duration-300 shadow-[0_0_15px_rgba(0,102,204,0.25)] flex items-center gap-2 hover:scale-[1.02]" title="Сменить тему оформления">
+                    <span id="theme-icon" class="text-base select-none">☀️</span>
+                    <span class="text-xs font-montserrat font-black uppercase tracking-wider text-zinc-300 select-none">Смена стиля</span>
                 </button>
             </div>
             
