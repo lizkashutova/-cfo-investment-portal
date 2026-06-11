@@ -570,12 +570,38 @@
         .light-theme #theme-toggle-btn span {
             color: #334155 !important;
         }
+
+        /* Hide scrollbar utility for clean mobile scrolling */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Responsive video block */
+        @media (max-width: 768px) {
+            .video-container-3d {
+                width: 100% !important;
+            }
+        }
+
+        /* Prevent math formula clip/overflow inside cards & modal overlay */
+        .zoomable-formula, #zoom-target {
+            overflow-x: auto;
+            max-width: 100%;
+            scrollbar-width: none;
+        }
+        .zoomable-formula::-webkit-scrollbar, #zoom-target::-webkit-scrollbar {
+            display: none;
+        }
 </style>
 </head>
 <body class="bg-black text-white font-sans min-h-screen flex flex-col antialiased">
 
     <!-- ВЕРХНЯЯ ШАПКА (HEADER) -->
-    <header class="bg-black border-b border-[#0066cc]/30 py-4 px-6 md:px-12 sticky top-0 z-40 custom-shadow">
+    <header class="bg-black border-b border-[#0066cc]/30 py-4 px-6 md:px-12 md:sticky relative top-0 z-40 custom-shadow">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             
             <!-- Логотип портала -->
@@ -606,15 +632,15 @@
                     <span id="header-logo" class="font-montserrat font-black text-[18px] md:text-[20px] tracking-tight leading-none text-white uppercase">
                         ИНВЕСТ-ДИАГНОСТИКА <span class="text-[#0066cc]">ЦФО</span>
                     </span>
-                    <span class="font-montserrat font-bold text-[9px] uppercase tracking-wider text-[#64748B] mt-2 leading-none">
+                    <span class="font-montserrat font-bold text-[9px] uppercase tracking-wider text-[#64748B] mt-2 leading-normal">
                         Интеллектуальная СППР v3.5 | Авторская разработка: Шутова Елизавета Дмитриевна | БГТУ «Военмех»
                     </span>
                 </div>
             </div>
 
             <!-- СЕГМЕНТИРОВАННОЕ МЕНЮ ВКЛАДОК (TABS) И СМЕНА ТЕМЫ -->
-            <div class="flex items-center gap-4 flex-wrap justify-center md:justify-end">
-                <nav class="flex space-x-4 md:space-x-8">
+            <div class="flex items-center gap-4 flex-wrap justify-center md:justify-end w-full md:w-auto">
+                <nav class="flex space-x-4 md:space-x-8 overflow-x-auto no-scrollbar whitespace-nowrap pb-1 max-w-full">
                     <button onclick="switchTab('tab-home', this)" class="tab-btn py-4 px-1 font-semibold text-xs md:text-sm tracking-wider uppercase transition-all border-b-2 border-[#0066cc] text-[#0066cc]">
                         ГЛАВНАЯ СТРАНИЦА
                     </button>
@@ -653,7 +679,7 @@
 
             <!-- Нижний текстовый блок (Массивный Геометрический Заголовок) -->
             <div class="w-full space-y-6 pt-4">
-                <h2 class="font-montserrat font-black text-5xl md:text-7xl lg:text-[7.5rem] tracking-tighter text-[#0066cc] uppercase leading-none select-none">
+                <h2 class="font-montserrat font-black text-4xl md:text-7xl lg:text-[7.5rem] tracking-tighter text-[#0066cc] uppercase leading-none select-none">
                     ИНВЕСТ-МАТРИЦА
                 </h2>
                 
@@ -681,7 +707,7 @@
                         </div>
                     </div>
                     <!-- Объемная 3D-карточка разработчика ("Author Profile Card") -->
-                    <div class="lg:col-span-1 relative overflow-hidden rounded-2xl p-6 flex items-center gap-5 transition-all duration-500 cursor-pointer select-none author-profile-card"
+                    <div class="lg:col-span-1 relative overflow-hidden rounded-2xl p-6 flex flex-col sm:flex-row items-center sm:items-center text-center sm:text-left gap-5 transition-all duration-500 cursor-pointer select-none author-profile-card"
                          style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(0, 102, 204, 0.35); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), 0 0 15px rgba(0, 102, 204, 0.15);">
                         
                         <!-- Вращающийся 3D-кристалл (SVG-кристалл) -->
@@ -708,7 +734,7 @@
                         </div>
 
                         <!-- Справа: Информация -->
-                        <div class="flex flex-col flex-grow relative z-10 min-w-0">
+                        <div class="flex flex-col items-center sm:items-start flex-grow relative z-10 min-w-0">
                             <div class="text-[9px] text-zinc-400 font-extrabold uppercase tracking-widest leading-none">Разработчик СППР</div>
                             
                             <!-- ФИО с 3D-тенями -->
@@ -1750,6 +1776,16 @@
             }
         });
 
+        // Автоматическая подстройка размеров Plotly-графиков при изменении экрана / повороте телефона
+        window.addEventListener('resize', function() {
+            const activeTab = document.querySelector('.tab-panel.active');
+            if (activeTab && activeTab.id === 'tab-dashboard') {
+                Plotly.Plots.resize('scatter-chart');
+                Plotly.Plots.resize('bar-chart');
+                Plotly.Plots.resize('radar-chart');
+            }
+        });
+
         // Функция переключения темы оформления
         function toggleTheme() {
             const body = document.body;
@@ -1801,22 +1837,22 @@
             if (tabId === 'tab-home') {
                 if (isLight) {
                     body.className = "bg-slate-50 text-slate-900 font-sans min-h-screen flex flex-col antialiased transition-colors duration-500 light-theme";
-                    header.className = "bg-white border-b border-slate-200 py-4 px-6 md:px-12 sticky top-0 z-40 custom-shadow transition-all duration-500";
+                    header.className = "bg-white border-b border-slate-200 py-4 px-6 md:px-12 md:sticky relative top-0 z-40 custom-shadow transition-all duration-500";
                     footer.className = "bg-white border-t border-slate-200 py-6 px-6 md:px-12 text-center text-xs text-slate-500 mt-auto transition-colors duration-500";
                 } else {
                     body.className = "bg-black text-white font-sans min-h-screen flex flex-col antialiased transition-colors duration-500";
-                    header.className = "bg-black border-b border-[#0066cc]/30 py-4 px-6 md:px-12 sticky top-0 z-40 custom-shadow transition-all duration-500";
+                    header.className = "bg-black border-b border-[#0066cc]/30 py-4 px-6 md:px-12 md:sticky relative top-0 z-40 custom-shadow transition-all duration-500";
                     footer.className = "bg-black border-t border-[#0066cc]/10 py-6 px-6 md:px-12 text-center text-xs text-gray-500 mt-auto transition-colors duration-500";
                 }
                 buttonElement.className = "tab-btn py-4 px-1 font-semibold text-xs md:text-sm tracking-wider uppercase transition-all border-b-2 border-[#0066cc] text-[#0066cc]";
             } else {
                 if (isLight) {
                     body.className = "bg-slate-100 text-slate-900 font-sans min-h-screen flex flex-col antialiased transition-colors duration-500 light-theme";
-                    header.className = "bg-slate-50 border-b border-slate-200 py-4 px-6 md:px-12 sticky top-0 z-40 custom-shadow transition-all duration-500";
+                    header.className = "bg-slate-50 border-b border-slate-200 py-4 px-6 md:px-12 md:sticky relative top-0 z-40 custom-shadow transition-all duration-500";
                     footer.className = "bg-slate-50 border-t border-slate-200 py-6 px-6 md:px-12 text-center text-xs text-slate-500 mt-auto transition-colors duration-500";
                 } else {
                     body.className = "bg-[#11141D] text-white font-sans min-h-screen flex flex-col antialiased transition-colors duration-500";
-                    header.className = "bg-[#1A1F2C] border-b border-[#0066cc]/30 py-4 px-6 md:px-12 sticky top-0 z-40 custom-shadow transition-all duration-500";
+                    header.className = "bg-[#1A1F2C] border-b border-[#0066cc]/30 py-4 px-6 md:px-12 md:sticky relative top-0 z-40 custom-shadow transition-all duration-500";
                     footer.className = "bg-[#1A1F2C] border-t border-[#0066cc]/10 py-6 px-6 md:px-12 text-center text-xs text-gray-500 mt-auto transition-colors duration-500";
                 }
                 buttonElement.className = "tab-btn py-4 px-1 font-semibold text-xs md:text-sm tracking-wider uppercase transition-all border-b-2 border-[#0066cc] text-[#0066cc]";
