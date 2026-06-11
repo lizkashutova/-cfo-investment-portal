@@ -223,15 +223,12 @@
         @keyframes pulseGlow {
             0% {
                 box-shadow: 0 8px 30px rgba(0, 102, 204, 0.4), 0 0 0 1px rgba(0, 102, 204, 0.2);
-                transform: translateY(0) scale(1);
             }
             50% {
-                box-shadow: 0 12px 35px rgba(0, 102, 204, 0.7), 0 0 20px 8px rgba(0, 102, 204, 0.35);
-                transform: translateY(-2px) scale(1.015);
+                box-shadow: 0 12px 35px rgba(0, 102, 204, 0.75), 0 0 20px 8px rgba(0, 102, 204, 0.45);
             }
             100% {
                 box-shadow: 0 8px 30px rgba(0, 102, 204, 0.4), 0 0 0 1px rgba(0, 102, 204, 0.2);
-                transform: translateY(0) scale(1);
             }
         }
         @keyframes keyPulse {
@@ -240,8 +237,8 @@
                 filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
             }
             50% {
-                transform: scale(1.08);
-                filter: drop-shadow(0 4px 10px rgba(0, 102, 204, 0.4));
+                transform: scale(1.12);
+                filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
             }
             100% {
                 transform: scale(1);
@@ -249,8 +246,11 @@
             }
         }
         .animate-key-pulse {
-            animation: keyPulse 2s infinite ease-in-out;
+            animation: keyPulse 1.8s infinite ease-in-out;
             transform-origin: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .btn-analyze-large:active {
             transform: translateY(-1px) scale(0.99);
@@ -806,13 +806,15 @@
                             <button onclick="switchTab('tab-dashboard', document.querySelector('.tab-btn[onclick*=\'tab-dashboard\']')); window.scrollTo({ top: 0, behavior: 'smooth' });"
                                     class="btn-analyze-large flex items-center justify-center gap-4 px-8 py-5 rounded-xl text-white font-montserrat font-black text-lg md:text-xl tracking-wide uppercase select-none transition-all duration-300 w-full sm:w-auto sm:inline-flex">
                                 <!-- Enter Key SVG Metaphor -->
-                                <svg class="flex-shrink-0 shadow-md animate-key-pulse" width="46" height="30" viewBox="0 0 46 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <rect x="1" y="3" width="44" height="25" rx="5" fill="#94A3B8" />
-                                    <rect x="1" y="1" width="44" height="24" rx="5" fill="#E2E8F0" />
-                                    <rect x="3" y="2" width="40" height="20" rx="4" fill="#F8FAFC" />
-                                    <rect x="4.5" y="3" width="37" height="18" rx="3.5" fill="#E2E8F0" />
-                                    <text x="23" y="15.5" fill="#334155" font-family="'Montserrat', sans-serif" font-size="9" font-weight="900" text-anchor="middle" letter-spacing="-0.2">Enter</text>
-                                </svg>
+                                <span class="flex-shrink-0 animate-key-pulse flex items-center justify-center">
+                                    <svg class="shadow-md" width="46" height="30" viewBox="0 0 46 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect x="1" y="3" width="44" height="25" rx="5" fill="#94A3B8" />
+                                        <rect x="1" y="1" width="44" height="24" rx="5" fill="#E2E8F0" />
+                                        <rect x="3" y="2" width="40" height="20" rx="4" fill="#F8FAFC" />
+                                        <rect x="4.5" y="3" width="37" height="18" rx="3.5" fill="#E2E8F0" />
+                                        <text x="23" y="15.5" fill="#334155" font-family="'Montserrat', sans-serif" font-size="9" font-weight="900" text-anchor="middle" letter-spacing="-0.2">Enter</text>
+                                    </svg>
+                                </span>
                                 <span>ПРОВЕСТИ ИНВЕСТ-АНАЛИЗ</span>
                             </button>
                         </div>
