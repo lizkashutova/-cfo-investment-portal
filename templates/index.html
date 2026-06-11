@@ -596,9 +596,86 @@
         .zoomable-formula::-webkit-scrollbar, #zoom-target::-webkit-scrollbar {
             display: none;
         }
+
+        /* ================= LIGHT THEME EXTRA READABILITY OVERRIDES ================= */
+        .light-theme p.text-white,
+        .light-theme span.text-white,
+        .light-theme li.text-white,
+        .light-theme div.text-white,
+        .light-theme h2.text-white,
+        .light-theme h3.text-white,
+        .light-theme h4.text-white,
+        .light-theme ul.text-white\/90,
+        .light-theme li.text-white\/90,
+        .light-theme span.text-white\/90,
+        .light-theme p.text-white\/90,
+        .light-theme p.text-zinc-100\/90,
+        .light-theme span.text-zinc-100\/90,
+        .light-theme div.text-zinc-100\/90,
+        .light-theme li.text-zinc-100\/90,
+        .light-theme .text-red-500\/80,
+        .light-theme .text-red-500 {
+            color: #1e293b !important;
+        }
+
+        /* Restore white text for elements inside royal blue cards, blue action buttons, and badges that remain dark in light theme */
+        .light-theme .btn-analyze-large p.text-white,
+        .light-theme .btn-analyze-large span.text-white,
+        .light-theme .btn-analyze-large div.text-white,
+        .light-theme .btn-pdf-download p.text-white,
+        .light-theme .btn-pdf-download span.text-white,
+        .light-theme .btn-pdf-download div.text-white,
+        .light-theme .bg-\[\#1A45D1\] p.text-white,
+        .light-theme .bg-\[\#1A45D1\] span.text-white,
+        .light-theme .bg-\[\#1A45D1\] div.text-white,
+        .light-theme .bg-\[\#1A45D1\] h2.text-white,
+        .light-theme .bg-\[\#1A45D1\] h4.text-white,
+        .light-theme .bg-\[\#1A45D1\] p.text-zinc-100\/90,
+        .light-theme .bg-\[\#1A45D1\] span.text-zinc-100\/90,
+        .light-theme .bg-\[\#1A45D1\] div.text-zinc-100\/90,
+        .light-theme .bg-\[\#1A45D1\] button.text-white,
+        .light-theme .bg-gradient-to-r span.text-white {
+            color: #ffffff !important;
+        }
+
+        /* Subindices list container background in light theme */
+        .light-theme .bg-\[\#11141D\]\/40 {
+            background-color: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        /* Roadmap/timeline dot contrast styles */
+        .light-theme .roadmap-block .bg-black {
+            background-color: #ffffff !important;
+        }
+        .light-theme .roadmap-block .bg-white {
+            background-color: #334155 !important;
+        }
+
+        /* Reset weights button color tweak */
+        .light-theme button[onclick="resetWeights()"] {
+            color: #0066cc !important;
+        }
+        .light-theme button[onclick="resetWeights()"]:hover {
+            color: #0052cc !important;
+            background-color: rgba(0, 102, 204, 0.2) !important;
+        }
+
+        /* Remove text shadows on profile card text in light mode */
+        .light-theme .author-profile-card p {
+            text-shadow: none !important;
+        }
 </style>
 </head>
 <body class="bg-black text-white font-sans min-h-screen flex flex-col antialiased">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+            }
+        })();
+    </script>
 
     <!-- ВЕРХНЯЯ ШАПКА (HEADER) -->
     <header class="bg-black border-b border-[#0066cc]/30 py-4 px-6 md:px-12 md:sticky relative top-0 z-40 custom-shadow">
@@ -655,7 +732,7 @@
                     </button>
                 </nav>
                 <button onclick="toggleTheme()" id="theme-toggle-btn" class="px-4 py-2 rounded-xl border border-[#0066cc]/40 bg-[#0D1117] hover:bg-zinc-900 text-yellow-400 hover:text-yellow-300 transition-all duration-300 shadow-[0_0_15px_rgba(0,102,204,0.25)] flex items-center gap-2 hover:scale-[1.02]" title="Сменить тему оформления">
-                    <span id="theme-icon" class="text-base select-none">☀️</span>
+                    <span id="theme-icon" class="text-base select-none">🌙</span>
                     <span class="text-xs font-montserrat font-black uppercase tracking-wider text-zinc-300 select-none">Смена стиля</span>
                 </button>
             </div>
@@ -679,9 +756,9 @@
 
             <!-- Нижний текстовый блок (Массивный Геометрический Заголовок) -->
             <div class="w-full space-y-6 pt-4">
-                <h2 class="font-montserrat font-black text-4xl md:text-7xl lg:text-[7.5rem] tracking-tighter text-[#0066cc] uppercase leading-none select-none">
+                <h1 id="main-title" class="font-montserrat font-black text-4xl md:text-7xl lg:text-[7.5rem] tracking-tighter text-[#0066cc] uppercase leading-none select-none">
                     ИНВЕСТ-МАТРИЦА
-                </h2>
+                </h1>
                 
                 <hr class="border-[#0066cc]/30 w-full">
                 
@@ -1753,15 +1830,24 @@
 
         // Инициализация при загрузке страницы
         document.addEventListener("DOMContentLoaded", function() {
-            // Загружаем тему из localStorage
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'light') {
-                document.body.classList.add('light-theme');
-                document.getElementById('theme-icon').innerText = '🌙';
-                
-                const activeBtn = document.querySelector('.tab-btn[onclick*="tab-home"]');
-                const activeTab = document.querySelector('.tab-panel.active');
-                if (activeTab && activeBtn) {
+            // Загружаем тему из localStorage, по умолчанию 'light'
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (savedTheme === 'dark') {
+                body.classList.remove('light-theme');
+                if (themeIcon) themeIcon.innerText = '☀️';
+            } else {
+                body.classList.add('light-theme');
+                if (themeIcon) themeIcon.innerText = '🌙';
+            }
+            
+            // Обновляем вкладки, чтобы применились стили для шапки/подвала
+            const activeTab = document.querySelector('.tab-panel.active');
+            if (activeTab) {
+                const activeBtn = document.querySelector(`.tab-btn[onclick*="${activeTab.id}"]`);
+                if (activeBtn) {
                     switchTab(activeTab.id, activeBtn);
                 }
             }
