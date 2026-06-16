@@ -272,7 +272,7 @@ def generate_pdf_bytes(selected_region, w_cadres, w_econ, w_infra, w_innov, w_ri
     return bytes(pdf.output())
 
 # Главная страница
-@app.get("/", response_class=HTMLResponse)
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 async def read_root():
     # Читаем файл шаблона
     with open("templates/index.html", "r", encoding="utf-8") as f:
