@@ -701,12 +701,12 @@
         }
 </style>
 </head>
-<body class="bg-black text-white font-sans min-h-screen flex flex-col antialiased">
+<body class="bg-black text-white font-sans min-h-screen flex flex-col antialiased light-theme">
     <script>
         (function() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            if (savedTheme === 'light') {
-                document.body.classList.add('light-theme');
+            const savedTheme = localStorage.getItem('theme_v2');
+            if (savedTheme === 'dark') {
+                document.body.classList.remove('light-theme');
             }
         })();
     </script>
@@ -1867,7 +1867,7 @@
         // Инициализация при загрузке страницы
         document.addEventListener("DOMContentLoaded", function() {
             // Загружаем тему из localStorage, по умолчанию 'light'
-            const savedTheme = localStorage.getItem('theme') || 'light';
+            const savedTheme = localStorage.getItem('theme_v2') || 'light';
             const body = document.body;
             const themeIcon = document.getElementById('theme-icon');
             
@@ -1916,11 +1916,11 @@
             
             if (isLight) {
                 body.classList.remove('light-theme');
-                localStorage.setItem('theme', 'dark');
+                localStorage.setItem('theme_v2', 'dark');
                 themeIcon.innerText = '☀️';
             } else {
                 body.classList.add('light-theme');
-                localStorage.setItem('theme', 'light');
+                localStorage.setItem('theme_v2', 'light');
                 themeIcon.innerText = '🌙';
             }
             
